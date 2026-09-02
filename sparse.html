@@ -1,0 +1,522 @@
+<title>Thin Result Layouts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Every value below is from src/app/portal/portal.css. This page is meant to
+   be indistinguishable from the shipped portal apart from the rate results
+   themselves, so nothing here is a fresh design decision. */
+:root{
+  --green:#3ddc84;--green-dim:#32c472;
+  --green-glow:rgba(61,220,132,.1);--green-soft:rgba(61,220,132,.28);
+  --s0:#121518;--s1:#161a1f;--s2:#1b2027;--s3:#222731;--s4:#2f3641;
+  --border:#2a303a;--border-subtle:#222731;--border-strong:#383f4c;
+  --text:#f0f2f5;--text-2:#d5dae1;--muted:#a2abb6;--dim:#78828e;
+  --warning:#fbbf24;--info:#60a5fa;
+  --radius-sm:8px;--radius-md:12px;--radius-lg:16px;
+  --font:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'JetBrains Mono','SF Mono',ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--s0);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.6;letter-spacing:-.006em;-webkit-font-smoothing:antialiased}
+h1,h2,h3{letter-spacing:-.025em;font-weight:600;line-height:1.2;margin:0}
+:focus-visible{outline:2px solid var(--green);outline-offset:2px;border-radius:4px}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:var(--s3);border-radius:2px}
+::selection{background:rgba(61,220,132,.15)}
+
+/* ── shell ─────────────────────────────────────────────────────────── */
+.shell{height:100vh;display:flex;overflow:hidden;background:var(--s0)}
+.sidebar{width:240px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column}
+.side-logo{height:56px;display:flex;align-items:center;padding:0 16px;border-bottom:1px solid var(--border)}
+.logo{font-family:var(--mono);font-weight:700;font-size:13px;letter-spacing:.14em;color:var(--green);border:1px solid var(--green-soft);border-radius:5px;padding:3px 8px}
+.nav{flex:1;padding:12px 8px;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+.nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;color:var(--muted);text-decoration:none}
+.nav a:hover{color:var(--text-2);background:var(--s2)}
+.nav a.active{color:var(--green);background:var(--green-glow)}
+.nav svg{flex-shrink:0}
+.side-foot{padding:12px;border-top:1px solid var(--border);display:flex;align-items:center;gap:9px}
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--s3);display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--text-2);flex-shrink:0}
+.side-foot .who{min-width:0}
+.side-foot .em{font-size:12px;color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.side-foot .co{font-size:11px;color:var(--dim)}
+
+.body{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:56px;flex-shrink:0;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 22px;gap:12px}
+.tenant{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--text-2)}
+.top-actions{display:flex;align-items:center;gap:14px}
+.btn{font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;padding:7px 15px;border-radius:var(--radius-sm);border:none;background:var(--green);color:var(--s0)}
+.linkish{font-size:12.5px;color:var(--muted);text-decoration:none}
+.linkish:hover{color:var(--text)}
+.main{flex:1;overflow-y:auto;padding:26px 22px 70px}
+.inner{max-width:1180px;margin:0 auto;display:grid;gap:20px}
+
+/* ── page head + quote form ───────────────────────────────────────── */
+.h1{font-size:24px}
+.sub{color:var(--muted);font-size:13.5px;margin:5px 0 0;max-width:640px}
+.glass{background:var(--s1);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;display:grid;gap:14px}
+.prefill{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--green);background:var(--green-glow);border:1px solid var(--green-soft);border-radius:var(--radius-sm);padding:7px 11px;justify-self:start}
+.frow{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+.field{display:grid;gap:5px;flex:1 1 150px}
+.label{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--dim)}
+.label .req{color:var(--green)}
+.input{font:inherit;font-size:13.5px;padding:9px 12px;border-radius:var(--radius-sm);background:var(--s0);border:1px solid var(--border);color:var(--text);width:100%}
+.input:hover{border-color:var(--border-strong)}
+select.input{appearance:none;cursor:pointer}
+.ghost{font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;background:transparent;border:none;color:var(--muted)}
+.ghost:hover{color:var(--text)}
+
+/* ── results ──────────────────────────────────────────────────────── */
+.res-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.res-head h2{font-size:18px}
+.res-sub{color:var(--muted);font-size:12.5px}
+.sep-dot{display:inline-block;width:4px;height:4px;border-radius:50%;background:var(--green);vertical-align:middle;margin:0 8px 2px}
+.count{text-align:right;font-size:12.5px;color:var(--text-2);white-space:nowrap}
+.count b{color:var(--green);font-size:17px;font-family:var(--mono)}
+.count .sub2{display:block;font-size:11px;color:var(--dim)}
+
+/* the chosen treatment: bare chips, no container */
+.chips{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.sep{width:1px;height:18px;background:var(--border);margin:0 6px}
+.chip-f{font:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:5px 11px;border-radius:999px;background:var(--s1);color:var(--muted);border:1px solid transparent}
+.chip-f:hover{color:var(--text);background:var(--s2)}
+.chip-f[aria-selected="true"]{background:var(--green-glow);color:var(--green);border-color:var(--green-soft)}
+
+.stacks{display:grid;gap:24px}
+.tier-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:9px}
+.tier-head h3{font-size:15px}
+.tier-blurb{font-size:12px;color:var(--muted);flex:1 1 auto}
+.tier-count{font-size:11px;color:var(--dim);font-family:var(--mono)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(212px,1fr));gap:12px}
+.card{position:relative;overflow:hidden;display:flex;flex-direction:column;border-radius:18px;padding:18px 18px 15px;background:var(--s1);border:1px solid var(--border);transition:transform .22s cubic-bezier(.23,1,.32,1),box-shadow .22s,border-color .18s}
+.card:hover{transform:translateY(-4px);box-shadow:0 18px 42px rgba(0,0,0,.5);border-color:var(--border-strong)}
+/* The recommended card is a green TINT and border, with no gradient bar
+   across the top. The bar was doing the same job twice and the fade-out
+   made it read as decoration rather than as a signal. */
+.card.best{background:rgba(61,220,132,.07);border-color:var(--green-soft)}
+.card.best:hover{border-color:rgba(61,220,132,.45)}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.chip{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:6px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);color:var(--text-2);white-space:nowrap}
+.chip.green{background:var(--green-glow);border-color:var(--green-soft);color:var(--green)}
+.flag{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--green)}
+.card-price{font-size:30px;font-weight:700;letter-spacing:-.05em;line-height:1;font-variant-numeric:tabular-nums;margin-bottom:8px}
+.card-arrive{font-size:13.5px;font-weight:600;margin-bottom:11px;letter-spacing:-.01em}
+.card-arrive .rel{color:var(--muted);font-weight:500}
+.card-meta{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--muted);margin-bottom:14px;flex-grow:1}
+.card-gtd{color:var(--dim);font-size:11.5px}
+.gap-note{margin-top:2px;padding-top:7px;border-top:1px dashed var(--border-subtle);color:var(--warning);font-size:11px;line-height:1.4}
+.card-cta{width:100%;border-radius:10px;padding:9px 0;font:inherit;font-size:12.5px;font-weight:700;border:none;cursor:pointer;background:rgba(255,255,255,.07);color:var(--text)}
+.card-cta:hover{background:rgba(255,255,255,.12)}
+.card-cta.primary{background:var(--green);color:var(--s0)}
+.card-cta.primary:hover{background:var(--green-dim)}
+.fold{font:inherit;font-size:12px;cursor:pointer;text-align:left;background:transparent;border:none;color:var(--muted);padding:10px 0 0}
+.fold:hover{color:var(--text)}
+.fold .hint{color:var(--dim)}
+.empty{color:var(--muted);font-size:13px;padding:20px 0}
+
+@media (prefers-reduced-motion:reduce){ .card{transition:none} .card:hover{transform:none} }
+@media (max-width:900px){ .sidebar{display:none} }
+</style>
+<style>
+.page{max-width:1120px;margin:0 auto;padding:34px 24px 80px}
+.masthead h1{font-size:26px;letter-spacing:-.025em;margin:0 0 8px}
+.eyebrow{font-size:10px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--green);margin-bottom:10px}
+.lede{color:var(--muted);max-width:66ch;margin:0 0 24px}
+.picker{display:flex;gap:7px;flex-wrap:wrap;align-items:center;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:14px}
+.plabel{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--dim)}
+.tab{font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;padding:6px 13px;border-radius:999px;background:transparent;color:var(--muted);border:1px solid var(--border)}
+.tab:hover{color:var(--text);border-color:var(--border-strong)}
+.tab[aria-selected="true"]{background:var(--green-glow);border-color:var(--green-soft);color:var(--green)}
+#note{font-size:12.5px;color:var(--dim);margin:0 0 26px}
+
+/* 1 · capped: tracks stay card-sized instead of stretching to fill */
+.grid.capped{grid-template-columns:repeat(auto-fill,minmax(0,240px));justify-content:start}
+
+/* 2 · merged heading */
+.merged-head{margin-bottom:12px}
+.merged-head h3{font-size:16px;margin-bottom:3px}
+.merged-head p{margin:0;font-size:12.5px;color:var(--muted);max-width:62ch}
+
+/* 3 · compact rows */
+.stable{display:grid;border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden}
+.srow{display:grid;grid-template-columns:auto minmax(0,1fr) auto 92px auto;align-items:center;gap:14px;padding:12px 14px;background:var(--s1);border-top:1px solid var(--border-subtle);font-size:13px}
+.srow:first-child{border-top:none}
+.srow:hover{background:var(--s2)}
+.scarrier{font-size:10px;font-weight:700;letter-spacing:.07em;padding:2px 7px;border-radius:5px;background:var(--s3);color:var(--text-2)}
+.scarrier.green{background:var(--green-glow);color:var(--green);border:1px solid var(--green-soft)}
+.sname{display:flex;align-items:center;gap:9px;flex-wrap:wrap;min-width:0}
+.sflag{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--green)}
+.scond{font-size:11.5px;color:var(--warning)}
+.sarrive{font-size:12.5px;color:var(--text-2);white-space:nowrap}
+.sarrive .rel{color:var(--muted)}
+.sprice{font-family:var(--mono);font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.sbuy{font:inherit;font-size:12px;font-weight:700;cursor:pointer;padding:6px 12px;border-radius:8px;border:none;background:var(--s3);color:var(--text);white-space:nowrap}
+.sbuy:hover{background:var(--s4)}
+@media(max-width:760px){.srow{grid-template-columns:auto minmax(0,1fr) auto}.sarrive{grid-column:2/-1}}
+</style>
+
+
+
+<div class="page">
+  <div class="masthead">
+    <div class="eyebrow">Warp Portal · /portal/parcel · thin results</div>
+    <h1>When the filter leaves almost nothing</h1>
+    <p class="lede">Filtering to Sway on the metro lane leaves one option. Today that becomes a card
+    stretched over four columns, then repeated under Fastest and again under Balanced — three
+    headings for one actual choice. Set the result count to 1 to see it, then switch treatments.</p>
+  </div>
+  <div class="picker" id="picker"></div>
+  <p id="note"></p>
+  <div id="stage"></div>
+</div>
+
+<script>
+const SHIP_DATE = '2026-09-02';
+const ARRIVAL = {
+  1: '2026-09-03', 2: '2026-09-04', 3: '2026-09-08',
+  4: '2026-09-09', 5: '2026-09-10', 6: '2026-09-11',
+};
+
+const r = (id, carrier, service, amount, days, guaranteed = false) => ({
+  rate_id: id, carrier_code: carrier, service_type: service,
+  total_amount: { currency: 'usd', amount }, delivery_days: days,
+  estimated_delivery_date: ARRIVAL[days] || null, guaranteed_service: guaranteed,
+});
+
+const LONG_RATES = [
+  r('l-01', 'ups', 'UPS® Ground Saver', 12.85, 5),
+  r('l-02', 'stamps_com', 'USPS Ground Advantage', 13.40, 5),
+  r('l-03', 'fedex', 'FedEx Ground® Economy', 14.20, 6),
+  r('l-04', 'ups', 'UPS® Ground', 16.75, 4),
+  r('l-05', 'fedex', 'FedEx Home Delivery®', 17.90, 4),
+  r('l-06', 'stamps_com', 'USPS Priority Mail®', 19.60, 3),
+  r('l-07', 'ups', 'UPS 3 Day Select®', 28.40, 3, true),
+  r('l-08', 'fedex', 'FedEx Express Saver®', 31.15, 3, true),
+  r('l-09', 'fedex', 'FedEx 2Day®', 44.80, 2, true),
+  r('l-10', 'ups', 'UPS 2nd Day Air®', 47.20, 2, true),
+  r('l-11', 'stamps_com', 'USPS Priority Mail Express®', 52.95, 2, true),
+  r('l-12', 'fedex', 'FedEx 2Day® A.M.', 58.30, 2, true),
+  r('l-13', 'ups', 'UPS 2nd Day Air® A.M.', 61.75, 2, true),
+  r('l-14', 'ups', 'UPS Next Day Air Saver®', 89.40, 1, true),
+  r('l-15', 'fedex', 'FedEx Standard Overnight®', 94.60, 1, true),
+  r('l-16', 'ups', 'UPS Next Day Air®', 108.20, 1, true),
+  r('l-17', 'fedex', 'FedEx Priority Overnight®', 112.85, 1, true),
+  r('l-18', 'dhl_express', 'DHL Express Worldwide', 142.50, 2, true),
+  r('l-19', 'ups', 'UPS Next Day Air® Early', 156.30, 1, true),
+  r('l-20', 'fedex', 'FedEx First Overnight®', 168.90, 1, true),
+];
+
+const METRO_RATES = [
+  r('m-01', 'ups', 'UPS® Ground Saver', 6.40, 2),
+  r('m-02', 'stamps_com', 'USPS Ground Advantage', 6.65, 2),
+  r('m-03', 'ups', 'UPS® Ground', 7.41, 1),
+  r('m-04', 'fedex', 'FedEx Ground® Economy', 8.90, 3),
+  r('m-05', 'stamps_com', 'USPS Priority Mail®', 9.85, 2),
+  r('m-06', 'fedex', 'FedEx Home Delivery®', 10.12, 2),
+  r('m-07', 'ups', 'UPS 3 Day Select®', 13.20, 3, true),
+  r('m-08', 'fedex', 'FedEx Express Saver®', 15.62, 3, true),
+  r('m-09', 'fedex', 'FedEx 2Day®', 22.40, 2, true),
+  r('m-10', 'ups', 'UPS 2nd Day Air®', 24.15, 2, true),
+  r('m-11', 'fedex', 'FedEx 2Day® A.M.', 29.85, 2, true),
+  r('m-12', 'stamps_com', 'USPS Priority Mail Express®', 31.20, 1, true),
+  r('m-13', 'ups', 'UPS 2nd Day Air® A.M.', 32.70, 2, true),
+  r('m-14', 'ups', 'UPS Next Day Air Saver®', 41.60, 1, true),
+  r('m-15', 'fedex', 'FedEx Standard Overnight®', 44.90, 1, true),
+  r('m-16', 'ups', 'UPS Next Day Air®', 52.30, 1, true),
+  r('m-17', 'fedex', 'FedEx Priority Overnight®', 56.75, 1, true),
+  r('m-18', 'ups', 'UPS Next Day Air® Early', 78.40, 1, true),
+  r('m-19', 'fedex', 'FedEx First Overnight®', 84.20, 1, true),
+  r('m-20', 'dhl_express', 'DHL Express Worldwide', 91.05, 2, true),
+  r('m-21', 'dhl_express', 'DHL Express 12:00', 118.30, 1, true),
+  r('m-22', 'dhl_express', 'DHL Express 9:00', 146.75, 1, true),
+];
+
+const SCENARIOS = [
+  {
+    id: 'long', name: 'LA → Chicago',
+    lane: { from: 'Los Angeles, CA 90013', to: 'Chicago, IL 60607', packages: '1 package · 5 lb · 12 × 9 × 4 in' },
+    tests: 'Twenty rates with real spread — five days of ground through overnight. Tests density.',
+    rates: LONG_RATES, sway: null,
+  },
+  {
+    id: 'metro', name: 'LA → San Diego',
+    lane: { from: 'Los Angeles, CA 90013', to: 'San Diego, CA 92101', packages: '1 package · 5 lb · 12 × 9 × 4 in' },
+    tests: 'Twenty-three rates that nearly all collapse — ground is already next-day, and Sway beats the express tier. Tests sparsity.',
+    rates: METRO_RATES,
+    sway: { rates: [{ service_type: 'EXPEDITED', transit_days: 1, total_amount: { currency: 'usd', amount: 12.50 } }], dropOffName: 'Warp LAX Hub' },
+  },
+];
+
+/* ═══════════════════════════════════════════════════════════════════
+   The model. What the rate list MEANS, kept apart from how it is
+   drawn, so the five views below differ in layout and never in data.
+   ═══════════════════════════════════════════════════════════════════ */
+
+const CARRIERS = { ups: 'UPS', fedex: 'FedEx', stamps_com: 'USPS', usps: 'USPS', dhl_express: 'DHL', sway: 'Sway' };
+const carrierLabel = (c) => CARRIERS[c] || c.replace(/_/g, ' ').toUpperCase();
+
+/* B beats A when it is no worse on every axis and strictly better on one.
+   The guarantee is the third axis; without it the whole express tier reads
+   as redundant on a short lane. */
+function dominates(b, a) {
+  if (b.days == null || a.days == null) return false;
+  const noWorse = b.price <= a.price && b.days <= a.days && b.guaranteed >= a.guaranteed;
+  const better = b.price < a.price || b.days < a.days || b.guaranteed > a.guaranteed;
+  return noWorse && better;
+}
+
+function buildModel(scenario) {
+  const options = [
+    ...(scenario.sway ? scenario.sway.rates.map((x) => ({
+      key: 'sway-' + x.service_type, carrier: 'Sway',
+      service: x.service_type[0] + x.service_type.slice(1).toLowerCase() + ' metro',
+      price: x.total_amount.amount, days: x.transit_days, arrivalISO: null, guaranteed: 1,
+      conditions: ['Drop off at ' + scenario.sway.dropOffName + ' — no collection from your address'],
+    })) : []),
+    ...scenario.rates.map((x) => ({
+      key: x.rate_id, carrier: carrierLabel(x.carrier_code), service: x.service_type,
+      price: x.total_amount.amount, days: x.delivery_days, arrivalISO: x.estimated_delivery_date,
+      guaranteed: x.guaranteed_service ? 1 : 0, conditions: [],
+    })),
+  ].sort((a, b) => a.price - b.price);
+
+  options.forEach((a) => {
+    const w = options.find((b) => b.key !== a.key && dominates(b, a));
+    a.dominatedBy = w ? w.key : null;
+  });
+
+  const frontier = options.filter((o) => !o.dominatedBy);
+  const dominated = options.filter((o) => o.dominatedBy);
+  const timed = options.filter((o) => o.days != null);
+  const cheapest = options[0] || null;
+  const fastest = timed.length
+    ? timed.reduce((best, o) => (o.days < best.days || (o.days === best.days && o.price < best.price) ? o : best))
+    : null;
+
+  /* The knee: most days saved per extra dollar, measured from cheapest. */
+  let bestValue = null, bestSlope = 0;
+  if (cheapest && cheapest.days != null) {
+    frontier.forEach((o) => {
+      if (o.key === cheapest.key || o.days == null) return;
+      const saved = cheapest.days - o.days, extra = o.price - cheapest.price;
+      if (saved <= 0 || extra <= 0) return;
+      const slope = saved / extra;
+      if (slope > bestSlope) { bestSlope = slope; bestValue = o; }
+    });
+  }
+
+  /* Grouped by transit days, not date — Sway quotes a day count and never
+     a date, and keying on the date would file it into a phantom group. */
+  const map = new Map();
+  options.forEach((o) => {
+    const k = o.days != null ? 'd' + o.days : 'unknown';
+    const g = map.get(k) || { arrivalISO: null, days: o.days, options: [], from: Infinity };
+    g.options.push(o);
+    g.from = Math.min(g.from, o.price);
+    g.arrivalISO = g.arrivalISO || o.arrivalISO;
+    map.set(k, g);
+  });
+  const arrivals = [...map.values()].sort((a, b) => (a.days ?? 99) - (b.days ?? 99));
+
+  return { options, frontier, dominated, cheapest, fastest, bestValue, arrivals, totalCount: options.length };
+}
+
+const money = (n) => '$' + n.toFixed(2);
+
+function arrivalLabel(iso, days) {
+  if (!iso) return days != null ? days + ' day' + (days === 1 ? '' : 's') : 'Transit varies';
+  return new Date(iso + 'T12:00:00Z').toLocaleDateString('en-US',
+    { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
+}
+
+const calendarGap = (iso) => iso == null ? null
+  : Math.round((Date.parse(iso + 'T00:00:00Z') - Date.parse(SHIP_DATE + 'T00:00:00Z')) / 86400000);
+
+function gapLabel(iso, days) {
+  const g = calendarGap(iso);
+  if (g == null) return days != null ? days + ' business day' + (days === 1 ? '' : 's') : '';
+  return g === 1 ? 'tomorrow' : 'in ' + g + ' days';
+}
+
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/* ═══════════════════════════════════════════════════════════════════
+   State + views
+   ═══════════════════════════════════════════════════════════════════ */
+
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   The thin-result problem.
+
+   Filter to Sway on the metro lane and one option survives. Today that
+   produces a card stretched across the full width, and then the SAME card
+   again under Fastest and again under Balanced — three headings, three
+   identical answers, one actual choice.
+
+   Two separate faults, and a fix has to address both:
+     1. a lone card stretches to fill a row built for four
+     2. the tiers stop meaning anything once they all resolve to one row
+   ═══════════════════════════════════════════════════════════════════ */
+
+const SC = SCENARIOS.find((s) => s.id === 'metro');
+const MODEL = buildModel(SC);
+const state = { t: 0, n: 1 };
+
+const TREATMENTS = [
+  { name: 'Current', note: 'One card stretched over four columns, then repeated under every tier.' },
+  { name: '1 · Cap the width', note: 'Cards keep their natural size and sit left. Fixes the stretch, not the repetition.' },
+  { name: '2 · Merge the tiers', note: 'When every tier resolves to the same rows, say so once and drop the headings.' },
+  { name: '3 · Compact rows', note: 'Below four results a row reads faster than a card, and cannot look stranded.' },
+];
+const COUNTS = [1, 2, 3, 8];
+
+function subset(n) {
+  /* Sway first so n=1 reproduces the exact screenshot. */
+  const sway = MODEL.options.filter((o) => o.carrier === 'Sway');
+  const rest = MODEL.options.filter((o) => o.carrier !== 'Sway');
+  return [...sway, ...rest].slice(0, n);
+}
+
+function tiersOf(list) {
+  const prices = list.map((o) => o.price), days = list.map((o) => o.days ?? 99);
+  const minP = Math.min(...prices), maxP = Math.max(...prices);
+  const minT = Math.min(...days), maxT = Math.max(...days);
+  const score = (o) => (o.price - minP) / Math.max(1, maxP - minP)
+    + ((o.days ?? 99) - minT) / Math.max(1, maxT - minT);
+  return {
+    cheapest: [...list].sort((a, b) => a.price - b.price),
+    fastest: [...list].sort((a, b) => (a.days ?? 99) - (b.days ?? 99) || a.price - b.price),
+    balanced: [...list].sort((a, b) => score(a) - score(b)),
+  };
+}
+
+const TIERS = [
+  { id: 'cheapest', label: 'Cheapest', blurb: 'Lowest price first' },
+  { id: 'fastest', label: 'Fastest', blurb: 'Soonest arrival first' },
+  { id: 'balanced', label: 'Balanced', blurb: 'Best trade of price against days' },
+];
+
+/* The tiers are only worth showing while they disagree. */
+function tiersAgree(t) {
+  const key = (l) => l.map((o) => o.key).join('|');
+  return key(t.cheapest) === key(t.fastest) && key(t.fastest) === key(t.balanced);
+}
+
+function card(o, lead, flagText) {
+  const gap = gapLabel(o.arrivalISO, o.days);
+  return '<div class="card' + (lead ? ' best' : '') + '"><div class="card-head">'
+    + '<span class="chip' + (o.carrier === 'Sway' ? ' green' : '') + '">' + esc(o.carrier) + '</span>'
+    + (flagText ? '<span class="flag">' + flagText + '</span>' : '') + '</div>'
+    + '<div class="card-price">' + money(o.price) + '</div>'
+    + '<div class="card-arrive">' + arrivalLabel(o.arrivalISO, o.days)
+    + (gap ? '<span class="rel"> · ' + gap + '</span>' : '') + '</div>'
+    + '<div class="card-meta"><span>' + esc(o.service) + '</span>'
+    + (o.guaranteed === 1 ? '<span class="card-gtd">Guaranteed delivery time</span>' : '')
+    + o.conditions.map((c) => '<div class="gap-note">' + esc(c) + '</div>').join('') + '</div>'
+    + '<button class="card-cta' + (lead ? ' primary' : '') + '" type="button">Buy label →</button></div>';
+}
+
+function rowOf(o, flags) {
+  const gap = gapLabel(o.arrivalISO, o.days);
+  return '<div class="srow"><span class="scarrier' + (o.carrier === 'Sway' ? ' green' : '') + '">'
+    + esc(o.carrier) + '</span>'
+    + '<span class="sname">' + esc(o.service)
+    + (flags ? '<span class="sflag">' + flags + '</span>' : '')
+    + (o.conditions.length ? '<span class="scond">' + esc(o.conditions[0]) + '</span>' : '')
+    + '</span>'
+    + '<span class="sarrive">' + arrivalLabel(o.arrivalISO, o.days)
+    + (gap ? ' <span class="rel">· ' + gap + '</span>' : '') + '</span>'
+    + '<span class="sprice">' + money(o.price) + '</span>'
+    + '<button class="sbuy" type="button">Buy →</button></div>';
+}
+
+function tierHead(t, n) {
+  return '<div class="tier-head"><h3>' + t.label + '</h3><span class="tier-blurb">' + t.blurb
+    + '</span><span class="tier-count">' + n + ' option' + (n === 1 ? '' : 's') + '</span></div>';
+}
+
+function render() {
+  const list = subset(state.n);
+  const t = tiersOf(list);
+  const agree = tiersAgree(t);
+  let body = '';
+
+  if (state.t === 0) {
+    body = '<div class="stacks">' + TIERS.map((tier) =>
+      '<section>' + tierHead(tier, list.length) + '<div class="grid">'
+      + t[tier.id].map((o, i) => card(o, i === 0, i === 0 ? tier.label : '')).join('')
+      + '</div></section>').join('') + '</div>';
+
+  } else if (state.t === 1) {
+    body = '<div class="stacks">' + TIERS.map((tier) =>
+      '<section>' + tierHead(tier, list.length) + '<div class="grid capped">'
+      + t[tier.id].map((o, i) => card(o, i === 0, i === 0 ? tier.label : '')).join('')
+      + '</div></section>').join('') + '</div>';
+
+  } else if (state.t === 2) {
+    if (agree) {
+      /* One heading that states the situation, instead of three that pretend
+         there were three different questions. */
+      const only = list.length === 1;
+      body = '<div class="merged-head">'
+        + '<h3>' + (only ? 'One option matches' : list.length + ' options match') + '</h3>'
+        + '<p>' + (only
+          ? 'It is the cheapest, the fastest and the best balanced — there is nothing to compare it against.'
+          : 'Cheapest, fastest and best balanced all rank these the same way, so they are shown once.')
+        + '</p></div>'
+        + '<div class="grid capped">'
+        + list.map((o, i) => card(o, i === 0, i === 0 ? 'Cheapest · Fastest · Balanced' : '')).join('')
+        + '</div>';
+    } else {
+      body = '<div class="stacks">' + TIERS.map((tier) =>
+        '<section>' + tierHead(tier, list.length) + '<div class="grid capped">'
+        + t[tier.id].map((o, i) => card(o, i === 0, i === 0 ? tier.label : '')).join('')
+        + '</div></section>').join('') + '</div>';
+    }
+
+  } else {
+    if (list.length < 4) {
+      const flagFor = (o) => {
+        const f = [];
+        if (t.cheapest[0].key === o.key) f.push('Cheapest');
+        if (t.fastest[0].key === o.key) f.push('Fastest');
+        if (t.balanced[0].key === o.key && !agree) f.push('Balanced');
+        return agree && f.length ? 'Best match' : f.join(' · ');
+      };
+      body = '<div class="merged-head"><h3>' + list.length + ' option'
+        + (list.length === 1 ? '' : 's') + ' match</h3>'
+        + '<p>Too few to rank three ways — listed once, cheapest first.</p></div>'
+        + '<div class="stable">' + t.cheapest.map((o) => rowOf(o, flagFor(o))).join('') + '</div>';
+    } else {
+      body = '<div class="stacks">' + TIERS.map((tier) =>
+        '<section>' + tierHead(tier, list.length) + '<div class="grid capped">'
+        + t[tier.id].map((o, i) => card(o, i === 0, i === 0 ? tier.label : '')).join('')
+        + '</div></section>').join('') + '</div>';
+    }
+  }
+
+  document.getElementById('stage').innerHTML = body;
+
+  document.getElementById('picker').innerHTML =
+    '<span class="plabel">Treatment</span>' + TREATMENTS.map((x, i) =>
+      '<button class="tab" type="button" data-t="' + i + '" aria-selected="' + (state.t === i) + '">'
+      + x.name + '</button>').join('')
+    + '<span class="plabel" style="margin-left:14px">Results</span>' + COUNTS.map((c) =>
+      '<button class="tab" type="button" data-n="' + c + '" aria-selected="' + (state.n === c) + '">'
+      + (c === 8 ? '8 (normal)' : c) + '</button>').join('');
+
+  document.getElementById('note').textContent = TREATMENTS[state.t].note;
+}
+
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-t],[data-n]');
+  if (!el) return;
+  if (el.dataset.t) state.t = Number(el.dataset.t); else state.n = Number(el.dataset.n);
+  render();
+});
+
+render();
+
+</script>
