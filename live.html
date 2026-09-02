@@ -114,6 +114,12 @@ select.input{appearance:none;cursor:pointer}
 .fold:hover{color:var(--text)}
 .fold .hint{color:var(--dim)}
 .empty{color:var(--muted);font-size:13px;padding:20px 0}
+/* A row built for four leaves a lone card stretched across the whole width.
+   Capped tracks keep cards their own size and sit them left instead. */
+.grid.capped{grid-template-columns:repeat(auto-fill,minmax(0,240px));justify-content:start}
+.merged-head{margin-bottom:12px}
+.merged-head h3{font-size:16px;margin-bottom:3px}
+.merged-head p{margin:0;font-size:12.5px;color:var(--muted);max-width:62ch}
 
 @media (prefers-reduced-motion:reduce){ .card{transition:none} .card:hover{transform:none} }
 @media (max-width:900px){ .sidebar{display:none} }
@@ -353,6 +359,14 @@ function tiersOf(list) {
   };
 }
 
+/* Three headings over three identical lists is three answers to a question
+   that only had one. Once every tier ranks the same rows the same way, the
+   tiers have stopped carrying information and are folded into one. */
+function tiersAgree(t) {
+  const key = (l) => l.map((o) => o.key).join('|');
+  return key(t.cheapest) === key(t.fastest) && key(t.fastest) === key(t.balanced);
+}
+
 function card(o, lead, tierLabel) {
   const gap = gapLabel(o.arrivalISO, o.days);
   return '<div class="card' + (lead ? ' best' : '') + '"><div class="card-head">'
@@ -396,14 +410,35 @@ function results() {
   }
 
   const t = tiersOf(list);
+
+  if (tiersAgree(t)) {
+    const only = list.length === 1;
+    const shown = state.more.all ? list : list.slice(0, 4);
+    const restN = Math.max(0, list.length - 4);
+    const merged = '<div class="merged-head"><h3>'
+      + (only ? 'One option matches' : list.length + ' options match') + '</h3><p>'
+      + (only
+        ? 'It is the cheapest, the fastest and the best balanced — there is nothing to compare it against.'
+        : 'Cheapest, fastest and best balanced all rank these the same way, so they are shown once.')
+      + '</p></div>'
+      + '<div class="grid capped">'
+      + shown.map((o, i) => card(o, i === 0, i === 0 ? 'Cheapest · Fastest · Balanced' : '')).join('')
+      + '</div>'
+      + (restN ? '<button class="fold" type="button" data-more="all">'
+        + (state.more.all ? '▾ Show fewer' : '▸ Show ' + restN + ' more') + '</button>' : '');
+    return head + chips + merged;
+  }
+
   const body = '<div class="stacks">' + TIERS.map((tier) => {
     const l = t[tier.id], open = state.more[tier.id];
     const shown = open ? l : l.slice(0, 4);
     const restN = Math.max(0, l.length - 4);
+    /* Fewer than four and the grid would stretch them; cap the tracks. */
+    const capped = shown.length < 4 ? ' capped' : '';
     return '<section><div class="tier-head"><h3>' + tier.label + '</h3><span class="tier-blurb">'
       + tier.blurb + '</span><span class="tier-count">' + l.length + ' option'
       + (l.length === 1 ? '' : 's') + '</span></div>'
-      + '<div class="grid">' + shown.map((o, i) => card(o, i === 0, tier.label)).join('') + '</div>'
+      + '<div class="grid' + capped + '">' + shown.map((o, i) => card(o, i === 0, tier.label)).join('') + '</div>'
       + (restN ? '<button class="fold" type="button" data-more="' + tier.id + '">'
         + (open ? '▾ Show fewer' : '▸ Show ' + restN + ' more')
         + '<span class="hint">' + (open ? '' : ' — ranked the same way') + '</span></button>' : '')
