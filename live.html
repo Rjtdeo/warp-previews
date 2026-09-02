@@ -78,7 +78,8 @@ select.input{appearance:none;cursor:pointer}
 
 /* the chosen treatment: bare chips, no container */
 .chips{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.sep{width:1px;height:18px;background:var(--border);margin:0 6px}
+/* Green, to match the separator dots in the lane line above it. */
+.sep{width:1px;height:18px;background:var(--green);margin:0 6px}
 .chip-f{font:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:5px 11px;border-radius:999px;background:var(--s1);color:var(--muted);border:1px solid transparent}
 .chip-f:hover{color:var(--text);background:var(--s2)}
 .chip-f[aria-selected="true"]{background:var(--green-glow);color:var(--green);border-color:var(--green-soft)}
