@@ -1,0 +1,48 @@
+<title>Warp Parcel Previews</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+:root{--green:#3ddc84;--green-glow:rgba(61,220,132,.1);--green-soft:rgba(61,220,132,.28);
+--s0:#121518;--s1:#161a1f;--s2:#1b2027;--border:#2a303a;--border-strong:#383f4c;
+--text:#f0f2f5;--muted:#a2abb6;--dim:#78828e;
+--font:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--s0);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.6;letter-spacing:-.006em;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding:56px 24px 80px}
+.logo{font-family:var(--mono);font-weight:700;font-size:12px;letter-spacing:.14em;color:var(--green);border:1px solid var(--green-soft);border-radius:5px;padding:3px 8px;display:inline-block;margin-bottom:22px}
+h1{font-size:27px;letter-spacing:-.025em;margin:0 0 8px}
+.sub{color:var(--muted);margin:0 0 32px;max-width:60ch}
+a.item{display:grid;gap:3px;padding:17px 19px;border:1px solid var(--border);border-radius:12px;background:var(--s1);text-decoration:none;color:var(--text);margin-bottom:10px}
+a.item:hover{background:var(--s2);border-color:var(--border-strong)}
+.t{font-weight:600;font-size:15px}
+.t .arrow{color:var(--green)}
+.d{font-size:12.5px;color:var(--muted)}
+.tag{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--green);background:var(--green-glow);border:1px solid var(--green-soft);border-radius:5px;padding:2px 7px;margin-left:8px}
+footer{margin-top:34px;padding-top:20px;border-top:1px solid var(--border);font-size:12px;color:var(--dim)}
+code{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+</style>
+<div class="wrap">
+  <span class="logo">WARP</span>
+  <h1>Parcel rate results — previews</h1>
+  <p class="sub">Design previews for <code>/portal/parcel</code>. Mock data, real shapes. Built from the
+  <code>previews/</code> folder of the shipwithwarp repo, so these pages update whenever that folder is pushed.</p>
+
+  <a class="item" href="/live.html">
+    <span class="t">The proposed page <span class="arrow">→</span><span class="tag">Current pick</span></span>
+    <span class="d">Full portal page as it would ship — bare-chip filters, Cheapest / Fastest / Balanced, four cards each.</span>
+  </a>
+  <a class="item" href="/filters.html">
+    <span class="t">Filter bar treatments <span class="arrow">→</span></span>
+    <span class="d">Six ways to hold the filters, same rates underneath. Bare chips was chosen from these.</span>
+  </a>
+  <a class="item" href="/directions.html">
+    <span class="t">Four layout directions <span class="arrow">→</span></span>
+    <span class="d">Today's page plus V1–V4 — decision table, three picks, arrival-first, price/speed frontier.</span>
+  </a>
+
+  <footer>
+    Add <code>?lane=metro</code> to the proposed page for the short-lane case, where ground is already
+    next-day and Sway beats the express tier.
+  </footer>
+</div>
