@@ -93,7 +93,10 @@ select.input{appearance:none;cursor:pointer}
 .tier-blurb{font-size:12px;color:var(--muted);flex:1 1 auto}
 .tier-count{font-size:11px;color:var(--dim);font-family:var(--mono)}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(212px,1fr));gap:12px}
-.card{position:relative;overflow:hidden;display:flex;flex-direction:column;border-radius:18px;padding:18px 18px 15px;background:var(--s1);border:1px solid var(--border);transition:transform .22s cubic-bezier(.23,1,.32,1),box-shadow .22s,border-color .18s}
+/* Every card the same height, so a note in one tier does not make that
+   whole row taller than the tier above it. Cards already stretch to
+   match WITHIN a row; this extends that across the page. */
+.card{min-height:250px;position:relative;overflow:hidden;display:flex;flex-direction:column;border-radius:18px;padding:18px 18px 15px;background:var(--s1);border:1px solid var(--border);transition:transform .22s cubic-bezier(.23,1,.32,1),box-shadow .22s,border-color .18s}
 .card:hover{transform:translateY(-4px);box-shadow:0 18px 42px rgba(0,0,0,.5);border-color:var(--border-strong)}
 /* The recommended card is a green TINT and border, with no gradient bar
    across the top. The bar was doing the same job twice and the fade-out
@@ -142,15 +145,15 @@ const ARRIVAL = {
   4: '2026-09-09', 5: '2026-09-10', 6: '2026-09-11',
 };
 
-const r = (id, carrier, service, amount, days, guaranteed = false) => ({
+const r = (id, carrier, service, amount, days, guaranteed = false, warnings = []) => ({
   rate_id: id, carrier_code: carrier, service_type: service,
   total_amount: { currency: 'usd', amount }, delivery_days: days,
-  estimated_delivery_date: ARRIVAL[days] || null, guaranteed_service: guaranteed,
+  estimated_delivery_date: ARRIVAL[days] || null, guaranteed_service: guaranteed, warnings,
 });
 
 const LONG_RATES = [
   r('l-01', 'ups', 'UPS® Ground Saver', 12.85, 5),
-  r('l-02', 'stamps_com', 'USPS Ground Advantage', 13.40, 5),
+  r('l-02', 'stamps_com', 'USPS Ground Advantage', 13.40, 5, false, ['No Saturday delivery on this service.']),
   r('l-03', 'fedex', 'FedEx Ground® Economy', 14.20, 6),
   r('l-04', 'ups', 'UPS® Ground', 16.75, 4),
   r('l-05', 'fedex', 'FedEx Home Delivery®', 17.90, 4),
@@ -173,9 +176,9 @@ const LONG_RATES = [
 
 const METRO_RATES = [
   r('m-01', 'ups', 'UPS® Ground Saver', 6.40, 2),
-  r('m-02', 'stamps_com', 'USPS Ground Advantage', 6.65, 2),
+  r('m-02', 'stamps_com', 'USPS Ground Advantage', 6.65, 2, false, ['No Saturday delivery on this service.']),
   r('m-03', 'ups', 'UPS® Ground', 7.41, 1),
-  r('m-04', 'fedex', 'FedEx Ground® Economy', 8.90, 3),
+  r('m-04', 'fedex', 'FedEx Ground® Economy', 8.90, 3, false, ['Final mile handed to USPS; no delivery appointment.']),
   r('m-05', 'stamps_com', 'USPS Priority Mail®', 9.85, 2),
   r('m-06', 'fedex', 'FedEx Home Delivery®', 10.12, 2),
   r('m-07', 'ups', 'UPS 3 Day Select®', 13.20, 3, true),
@@ -236,12 +239,12 @@ function buildModel(scenario) {
       key: 'sway-' + x.service_type, carrier: 'Sway',
       service: x.service_type[0] + x.service_type.slice(1).toLowerCase() + ' metro',
       price: x.total_amount.amount, days: x.transit_days, arrivalISO: null, guaranteed: 1,
-      conditions: ['Drop off at ' + scenario.sway.dropOffName + ' — no collection from your address'],
+      conditions: ['Drop-off required at ' + scenario.sway.dropOffName + ', cutoff 2:00pm'],
     })) : []),
     ...scenario.rates.map((x) => ({
       key: x.rate_id, carrier: carrierLabel(x.carrier_code), service: x.service_type,
       price: x.total_amount.amount, days: x.delivery_days, arrivalISO: x.estimated_delivery_date,
-      guaranteed: x.guaranteed_service ? 1 : 0, conditions: [],
+      guaranteed: x.guaranteed_service ? 1 : 0, conditions: x.warnings || [],
     })),
   ].sort((a, b) => a.price - b.price);
 
