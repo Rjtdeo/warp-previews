@@ -429,7 +429,13 @@ function card(o, lead, flagText) {
     + '<div class="card-arrive">' + when + '</div>'
     + '<div class="card-meta"><span>' + esc(o.service) + '</span>'
     + (o.guaranteed === 1 ? '<span class="card-gtd">Guaranteed delivery time</span>' : '')
-    + o.conditions.map((c) => '<div class="card-note"><span class="star">*</span><span>' + esc(c) + '</span></div>').join('') + '</div>'
+    + '</div>'
+    /* Outside card-meta on purpose. card-meta carries flex-grow, so a note
+       inside it got pinned to the top and the slack opened up underneath —
+       the disclaimer ended up floating in the middle of the card. Out here it
+       sits against the button, where the condition is read last, immediately
+       before the thing it is a condition of. */
+    + o.conditions.map((c) => '<div class="card-note"><span class="star">*</span><span>' + esc(c) + '</span></div>').join('')
     + '<button class="card-cta' + (lead ? ' primary' : '') + '" type="button">Buy label →</button></div>';
 }
 

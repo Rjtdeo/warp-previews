@@ -691,7 +691,8 @@ function viewToday(m, s) {
       + '<div class="card-price">' + money(x.total_amount.amount) + ' USD</div>'
       + '<div class="card-meta"><span>expedited courier delivery</span>'
       + '<span>' + x.transit_days + ' day transit</span>'
-      + '<div class="card-note"><span class="star">*</span><span>Drop-off required at ' + esc(s.sway.dropOffName) + '</span></div></div>'
+      + '</div>'
+      + '<div class="card-note"><span class="star">*</span><span>Drop-off required at ' + esc(s.sway.dropOffName) + '</span></div>'
       + '<button class="card-cta primary" type="button">Buy label →</button></div>';
   }).join('');
 
