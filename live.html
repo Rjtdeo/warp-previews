@@ -109,7 +109,12 @@ select.input{appearance:none;cursor:pointer}
 .card-arrive .rel{color:var(--muted);font-weight:500}
 .card-meta{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--muted);margin-bottom:14px;flex-grow:1}
 .card-gtd{color:var(--dim);font-size:11.5px}
-.gap-note{margin-top:2px;padding-top:7px;border-top:1px dashed var(--border-subtle);color:var(--warning);font-size:11px;line-height:1.4}
+/* Disclaimer, same as the freight mockup: an amber asterisk against dim
+   text. The dashed rule this replaces drew a line across the card for a
+   note that is a footnote, not a section. */
+.card-note{display:flex;gap:6px;font-size:11px;line-height:1.45;color:var(--dim);margin-bottom:11px}
+.card-note + .card-note{margin-top:-6px}
+.card-note .star{color:var(--warning);font-weight:700;flex-shrink:0}
 .card-cta{width:100%;border-radius:10px;padding:9px 0;font:inherit;font-size:12.5px;font-weight:700;border:none;cursor:pointer;background:rgba(255,255,255,.07);color:var(--text)}
 .card-cta:hover{background:rgba(255,255,255,.12)}
 .card-cta.primary{background:var(--green);color:var(--s0)}
@@ -388,7 +393,7 @@ function card(o, lead, tierLabel) {
     + '<div class="card-arrive">' + when + '</div>'
     + '<div class="card-meta"><span>' + esc(o.service) + '</span>'
     + (o.guaranteed === 1 ? '<span class="card-gtd">Guaranteed delivery time</span>' : '')
-    + o.conditions.map((c) => '<div class="gap-note">' + esc(c) + '</div>').join('') + '</div>'
+    + o.conditions.map((c) => '<div class="card-note"><span class="star">*</span><span>' + esc(c) + '</span></div>').join('') + '</div>'
     + '<button class="card-cta' + (lead ? ' primary' : '') + '" type="button">Buy label →</button></div>';
 }
 
