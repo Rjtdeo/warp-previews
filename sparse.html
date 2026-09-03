@@ -405,13 +405,20 @@ function tiersAgree(t) {
 }
 
 function card(o, lead, flagText) {
-  const gap = gapLabel(o.arrivalISO, o.days);
+  /* The date leads; how far away it is goes in brackets after it. A middot
+     between two time phrases read as decoration rather than punctuation.
+     And when the carrier gave no date — Sway quotes a day count and never a
+     date — there is only one thing to say, so "1 day - 1 business day" (the
+     same fact twice, either side of a dot) collapses to "1 business day". */
+  const gap = o.arrivalISO ? gapLabel(o.arrivalISO, o.days) : null;
+  const when = o.arrivalISO
+    ? arrivalLabel(o.arrivalISO, o.days) + (gap ? ' <span class="rel">(' + gap + ')</span>' : '')
+    : (o.days != null ? o.days + ' business day' + (o.days === 1 ? '' : 's') : 'Transit varies');
   return '<div class="card' + (lead ? ' best' : '') + '"><div class="card-head">'
     + '<span class="chip' + (o.carrier === 'Sway' ? ' green' : '') + '">' + esc(o.carrier) + '</span>'
     + (flagText ? '<span class="flag">' + flagText + '</span>' : '') + '</div>'
     + '<div class="card-price">' + money(o.price) + '</div>'
-    + '<div class="card-arrive">' + arrivalLabel(o.arrivalISO, o.days)
-    + (gap ? '<span class="rel"> · ' + gap + '</span>' : '') + '</div>'
+    + '<div class="card-arrive">' + when + '</div>'
     + '<div class="card-meta"><span>' + esc(o.service) + '</span>'
     + (o.guaranteed === 1 ? '<span class="card-gtd">Guaranteed delivery time</span>' : '')
     + o.conditions.map((c) => '<div class="gap-note">' + esc(c) + '</div>').join('') + '</div>'
