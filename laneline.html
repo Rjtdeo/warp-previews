@@ -1,0 +1,127 @@
+<title>Rates Header Line</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+:root{
+  --green:#3ddc84;--green-glow:rgba(61,220,132,.1);--green-soft:rgba(61,220,132,.28);
+  --s0:#121518;--s1:#161a1f;--s2:#1b2027;--s3:#222731;--s4:#2f3641;
+  --border:#2a303a;--border-subtle:#222731;--border-strong:#383f4c;
+  --text:#f0f2f5;--text-2:#d5dae1;--muted:#a2abb6;--dim:#78828e;
+  --font:'Inter',system-ui,-apple-system,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--s0);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.6;letter-spacing:-.006em;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1000px;margin:0 auto;padding:44px 24px 90px}
+.eyebrow{font-size:10px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--green);margin-bottom:10px}
+h1{font-size:27px;letter-spacing:-.025em;margin:0 0 10px}
+.lede{color:var(--muted);max-width:68ch;margin:0 0 30px}
+.opt{padding:24px 0 28px;border-top:1px solid var(--border)}
+.opt-head{display:flex;align-items:baseline;gap:11px;flex-wrap:wrap;margin-bottom:18px}
+.opt-head h2{font-size:14px;margin:0;letter-spacing:-.02em;color:var(--text-2)}
+.tag{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--green);background:var(--green-glow);border:1px solid var(--green-soft);border-radius:5px;padding:2px 7px}
+.opt-note{font-size:12.5px;color:var(--dim);flex:1 1 320px;min-width:0}
+.stage{padding:18px 20px;background:var(--s1);border:1px solid var(--border);border-radius:14px}
+
+/* shared header pieces */
+.h2{font-size:19px;letter-spacing:-.025em;font-weight:600}
+.sub{color:var(--muted);font-size:12.5px}
+.gdot{display:inline-block;width:4px;height:4px;border-radius:50%;background:var(--green);vertical-align:middle;margin:0 8px 2px}
+.ndot{color:var(--dim);margin:0 7px}
+.route{color:var(--text-2)}
+.zip{font-family:var(--mono);font-size:11.5px;color:var(--dim)}
+.arrow{color:var(--dim);margin:0 7px}
+
+/* C · facts as pills */
+.facts{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.fact{font-size:11px;font-weight:600;color:var(--muted);background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:3px 9px}
+.fact b{color:var(--text-2);font-weight:600}
+
+/* D · two tier */
+.tier2{margin-top:5px;font-size:12px;color:var(--dim)}
+
+/* E · lane is the heading */
+.lane-h{font-size:20px;letter-spacing:-.025em;font-weight:600;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.lane-h .to{color:var(--text)}
+.lane-h .ar{color:var(--green);font-size:17px}
+.meta-line{margin-top:6px;font-size:12.5px;color:var(--dim)}
+
+/* F · labelled */
+.cols{display:flex;gap:26px;flex-wrap:wrap;margin-top:9px}
+.col{display:grid;gap:1px}
+.k{font-size:9.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--dim)}
+.v{font-size:13px;color:var(--text-2);font-weight:500}
+.v .mono{font-family:var(--mono);font-size:12px;color:var(--muted)}
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">Warp Portal · /portal/parcel · results header</div>
+  <h1>The line above the rates</h1>
+  <p class="lede">Same facts in every version — the lane, the ZIPs, one package, 5 lb, 1,741 miles.
+  Only how they are arranged changes.</p>
+
+  <div class="opt">
+    <div class="opt-head"><h2>A · Green dots</h2><span class="tag">Current</span>
+      <span class="opt-note">Five facts strung on one line by punctuation. The dots carry all the structure.</span></div>
+    <div class="stage">
+      <div class="h2">Rates</div>
+      <div class="sub">Los Angeles, CA 90013 <span class="arrow">→</span> Chicago, IL 60607<span class="gdot"></span>1 package<span class="gdot"></span>5 lb<span class="gdot"></span>1,741 mi</div>
+    </div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><h2>B · Neutral dots</h2>
+      <span class="opt-note">Same line, grey separators. Quieter, but still one long string to parse.</span></div>
+    <div class="stage">
+      <div class="h2">Rates</div>
+      <div class="sub">Los Angeles, CA 90013 <span class="arrow">→</span> Chicago, IL 60607<span class="ndot">·</span>1 package<span class="ndot">·</span>5 lb<span class="ndot">·</span>1,741 mi</div>
+    </div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><h2>C · Lane in words, facts as pills</h2>
+      <span class="opt-note">Separates the two kinds of fact: where it goes reads as a sentence, what it is reads as data.</span></div>
+    <div class="stage">
+      <div class="h2">Rates</div>
+      <div class="sub">Los Angeles, CA 90013 <span class="arrow">→</span> Chicago, IL 60607</div>
+      <div class="facts">
+        <span class="fact">1 package</span><span class="fact"><b>5 lb</b></span>
+        <span class="fact">12 × 9 × 4 in</span><span class="fact"><b>1,741</b> mi</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><h2>D · Two tiers</h2>
+      <span class="opt-note">Lane on its own line, package facts demoted beneath. No separator does any work.</span></div>
+    <div class="stage">
+      <div class="h2">Rates</div>
+      <div class="sub">Los Angeles, CA 90013 <span class="arrow">→</span> Chicago, IL 60607</div>
+      <div class="tier2">1 package, 5 lb, 12 × 9 × 4 in — 1,741 miles</div>
+    </div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><h2>E · The lane is the heading</h2>
+      <span class="opt-note">Drops the word “Rates”, which names the page rather than the shipment. The lane is the subject, so it gets the heading.</span></div>
+    <div class="stage">
+      <div class="lane-h"><span>Los Angeles</span><span class="ar">→</span><span class="to">Chicago</span></div>
+      <div class="meta-line"><span class="zip">90013</span> to <span class="zip">60607</span> · 1,741 miles · 1 package, 5 lb</div>
+    </div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><h2>F · Labelled values</h2>
+      <span class="opt-note">Every number says what it is. Nothing to infer, and it survives a fact being added.</span></div>
+    <div class="stage">
+      <div class="h2">Rates</div>
+      <div class="cols">
+        <div class="col"><span class="k">From</span><span class="v">Los Angeles, CA <span class="mono">90013</span></span></div>
+        <div class="col"><span class="k">To</span><span class="v">Chicago, IL <span class="mono">60607</span></span></div>
+        <div class="col"><span class="k">Package</span><span class="v">1 × 5 lb</span></div>
+        <div class="col"><span class="k">Distance</span><span class="v">1,741 mi</span></div>
+      </div>
+    </div>
+  </div>
+</div>
