@@ -74,8 +74,8 @@ h1,h2,h3{letter-spacing:-.025em;font-weight:600;line-height:1.2;margin:0}
 /* Absolute, not its own row. As a flex row it reserved a full band across
    the top of the card for one small button, and the band read as a gap. The
    label line beside "To" is already empty, so it sits there instead. */
-.edit-wrap{position:absolute;top:10px;right:18px;z-index:2}
-.edit-btn{font:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:6px 13px;
+.lane-top{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:22px}
+.edit-btn{font:inherit;font-size:11px;font-weight:600;cursor:pointer;padding:2px 10px;
   border-radius:999px;background:transparent;color:var(--muted);border:1px solid var(--border)}
 .edit-btn:hover{color:var(--text);border-color:var(--border-strong)}
 .zip.on{background:var(--s2);border-color:var(--green-soft)}
@@ -772,11 +772,24 @@ function render() {
 
 /* The quote form, arriving with the lane already answered — the hand-off
    from the dashboard widget. Only the package is left to fill in. */
-function laneField(label, zip, city, which, editing) {
-  return '<label class="lane-field"><span class="lane-label">' + label + '</span>'
+/**
+ * `trailing` rides in the label row beside the label. Edit lane used to be
+ * absolutely positioned in the card's top-right corner, which meant every
+ * time the layout tightened it landed on the To field again — it has been
+ * nudged twice already. In the label row it cannot overlap the input at any
+ * size, because it is laid out beside it rather than floating over it.
+ *
+ * A <div> rather than a <label>, since a button nested inside a label would
+ * also focus the input when clicked. The input keeps its name via aria-label.
+ */
+function laneField(label, zip, city, which, editing, trailing) {
+  return '<div class="lane-field">'
+    + '<div class="lane-top"><span class="lane-label">' + label + '</span>'
+    + (trailing || '') + '</div>'
     + '<input class="zip' + (editing ? ' on' : '') + '" data-zip="' + which + '" value="' + esc(zip)
-    + '" inputmode="numeric" maxlength="5"' + (editing ? '' : ' readonly') + '>'
-    + '<span class="zip-city" data-city="' + which + '">' + esc(city) + '</span></label>';
+    + '" inputmode="numeric" maxlength="5" aria-label="' + label + ' ZIP code"'
+    + (editing ? '' : ' readonly') + '>'
+    + '<span class="zip-city" data-city="' + which + '">' + esc(city) + '</span></div>';
 }
 
 function form() {
@@ -799,14 +812,13 @@ function form() {
        ZIPs came from the dashboard, which the customer already knows — they
        just came from it — and it took a full row to say so on every visit.
        The button carries what is actionable; nothing carries the rest. */
-    + '<div class="edit-wrap">'
-    + '<button class="edit-btn" type="button" data-edit="1">'
-    + (editing ? 'Done' : 'Edit lane') + '</button>'
-    + '</div>'
+
     + '<div class="lane-row">'
     + laneField('From', fromZip, fromCity, 'from', editing)
     + '<span class="lane-arrow" aria-hidden="true">→</span>'
-    + laneField('To', toZip, toCity, 'to', editing)
+    + laneField('To', toZip, toCity, 'to', editing,
+        '<button class="edit-btn" type="button" data-edit="1">'
+        + (editing ? 'Done' : 'Edit lane') + '</button>')
     + '</div>'
     + '<div class="frow">'
     + '<label class="field" style="flex:1 1 190px"><span class="label">Package</span>'
