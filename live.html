@@ -55,7 +55,7 @@ h1,h2,h3{letter-spacing:-.025em;font-weight:600;line-height:1.2;margin:0}
 /* ── page head + quote form ───────────────────────────────────────── */
 .h1{font-size:24px}
 .sub{color:var(--muted);font-size:13.5px;margin:5px 0 0;max-width:640px}
-.glass{background:var(--s1);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;display:grid;gap:14px}
+.glass{position:relative;background:var(--s1);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;display:grid;gap:14px}
 /* Lane control, matching customer.wearewarp.com/dashboard/freight-quote:
    the ZIP is what you type and it sits centred in the box; the city it
    resolves to is confirmation, so it goes underneath in muted text rather
@@ -71,7 +71,10 @@ h1,h2,h3{letter-spacing:-.025em;font-weight:600;line-height:1.2;margin:0}
 .zip-city.unknown{color:var(--warning)}
 .lane-arrow{color:var(--dim);font-size:17px;padding-top:4px}
 @media(max-width:620px){.lane-row{grid-template-columns:1fr}.lane-arrow{display:none}}
-.prefill-row{display:flex;justify-content:flex-end;margin-bottom:-4px}
+/* Absolute, not its own row. As a flex row it reserved a full band across
+   the top of the card for one small button, and the band read as a gap. The
+   label line beside "To" is already empty, so it sits there instead. */
+.edit-wrap{position:absolute;top:16px;right:18px;z-index:2}
 .edit-btn{font:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:6px 13px;
   border-radius:999px;background:transparent;color:var(--muted);border:1px solid var(--border)}
 .edit-btn:hover{color:var(--text);border-color:var(--border-strong)}
@@ -700,7 +703,7 @@ function form() {
        ZIPs came from the dashboard, which the customer already knows — they
        just came from it — and it took a full row to say so on every visit.
        The button carries what is actionable; nothing carries the rest. */
-    + '<div class="prefill-row">'
+    + '<div class="edit-wrap">'
     + '<button class="edit-btn" type="button" data-edit="1">'
     + (editing ? 'Done' : 'Edit lane') + '</button>'
     + '</div>'
