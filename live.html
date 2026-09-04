@@ -770,6 +770,11 @@ document.addEventListener('input', (e) => {
   }
 });
 
+/* form() seeds state.lane from the URL params, so it has to run before the
+   first quote — otherwise the cards show fixture data while the form above
+   them shows the lane from the URL, and the two disagree on first paint. */
+form();
+requote();
 render();
 
 </script>
