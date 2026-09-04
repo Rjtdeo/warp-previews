@@ -823,9 +823,13 @@ function form() {
     + '<div class="frow">'
     + '<label class="field" style="flex:1 1 190px"><span class="label">Package</span>'
     + '<select class="input" data-preset="1">'
+    /* Parentheses, not a dash. The repo does not join these at all —
+       Select.tsx:130 renders the hint as its own muted span beside the label
+       — but a native <option> cannot style part of its text, so the size is
+       bracketed as an aside instead of welded on with punctuation. */
     + PRESETS.map((x) => '<option value="' + esc(x.label) + '"'
       + (state.preset === x.label ? ' selected' : '') + '>' + esc(x.label)
-      + ' — ' + esc(x.hint) + '</option>').join('')
+      + ' (' + esc(x.hint) + ')</option>').join('')
     + '</select></label>'
     + dimField('Weight (lb)', 'wt', state.weight)
     + dimField('Length (in)', 'ln', state.l)
