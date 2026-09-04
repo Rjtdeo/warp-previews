@@ -94,24 +94,24 @@ const VARIANTS = [
   { id:'v1', name:'1 · Drop the floor', tag:'',
     note:'Cards size to their content. No dead space at all — but a tier with a note sits taller than one without.',
     card:(x)=>'<div class="card'+(x.best?' best':'')+'">'+head(x)+priceBlock(x)
-      +'<div class="meta"><span>'+x.s+'</span>'+(x.gtd?'<span class="gtd-line">Guaranteed delivery time</span>':'')+'</div>'
+      +'<div class="meta grow"><span>'+x.s+'</span>'+(x.gtd?'<span class="gtd-line">Guaranteed delivery time</span>':'')+'</div>'
       +noteHtml(x)+cta(x)+'</div>' },
 
   { id:'v2', name:'2 · Guarantee becomes a chip', tag:'',
     note:'“Guaranteed delivery time” moves up beside the carrier as a chip, so it stops being a line some cards have and others do not.',
     card:(x)=>'<div class="card'+(x.best?' best':'')+'">'+head(x,true)+priceBlock(x)
-      +'<div class="meta"><span>'+x.s+'</span></div>'+noteHtml(x)+cta(x)+'</div>' },
+      +'<div class="meta grow"><span>'+x.s+'</span></div>'+noteHtml(x)+cta(x)+'</div>' },
 
   { id:'v3', name:'3 · Disclaimer becomes a marker', tag:'',
     note:'The note collapses to an asterisk after the service name, with the text on hover. Every card is then the same shape.',
     card:(x)=>'<div class="card'+(x.best?' best':'')+'">'+head(x,true)+priceBlock(x)
-      +'<div class="meta"><span>'+x.s
+      +'<div class="meta grow"><span>'+x.s
       +(x.note?' <span class="mark" title="'+x.note+'">*</span>':'')+'</span></div>'+cta(x)+'</div>' },
 
   { id:'v4', name:'4 · Reserve one note line', tag:'Recommended',
     note:'Guarantee as a chip, and one line of space kept for a note whether or not there is one. Cards match without a floor, and long notes still read in full.',
     card:(x)=>'<div class="card'+(x.best?' best':'')+'">'+head(x,true)+priceBlock(x)
-      +'<div class="meta"><span>'+x.s+'</span></div>'
+      +'<div class="meta grow"><span>'+x.s+'</span></div>'
       +'<div class="note-slot">'+(x.note?'<div class="note" style="margin:0"><span class="star">*</span><span>'+x.note+'</span></div>':'')+'</div>'
       +cta(x)+'</div>' },
 ];
