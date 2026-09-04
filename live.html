@@ -46,7 +46,7 @@ h1,h2,h3{letter-spacing:-.025em;font-weight:600;line-height:1.2;margin:0}
 .topbar{height:56px;flex-shrink:0;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 22px;gap:12px}
 .tenant{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--text-2)}
 .top-actions{display:flex;align-items:center;gap:14px}
-.btn{font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;padding:7px 15px;border-radius:var(--radius-sm);border:none;background:var(--green);color:var(--s0)}
+.btn{font:inherit;font-size:12px;font-weight:700;cursor:pointer;padding:7px 14px;border-radius:var(--radius-sm);border:none;background:var(--green);color:var(--s0)}
 .linkish{font-size:12.5px;color:var(--muted);text-decoration:none}
 .linkish:hover{color:var(--text)}
 .main{flex:1;overflow-y:auto;padding:26px 22px 70px}
@@ -55,19 +55,19 @@ h1,h2,h3{letter-spacing:-.025em;font-weight:600;line-height:1.2;margin:0}
 /* ── page head + quote form ───────────────────────────────────────── */
 .h1{font-size:24px}
 .sub{color:var(--muted);font-size:13.5px;margin:5px 0 0;max-width:640px}
-.glass{position:relative;background:var(--s1);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;display:grid;gap:14px}
+.glass{position:relative;background:var(--s1);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;display:grid;gap:12px}
 /* Lane control, matching customer.wearewarp.com/dashboard/freight-quote:
    the ZIP is what you type and it sits centred in the box; the city it
    resolves to is confirmation, so it goes underneath in muted text rather
    than being crammed into the field. */
 .lane-row{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:14px;align-items:center}
-.lane-field{display:grid;gap:7px}
+.lane-field{display:grid;gap:4px}
 .lane-label{font-size:13.5px;color:var(--text-2);font-weight:500}
-.zip{font:inherit;font-size:17px;font-weight:600;text-align:center;letter-spacing:.02em;
-  font-variant-numeric:tabular-nums;padding:13px 12px;border-radius:10px;
+.zip{font:inherit;font-size:15px;font-weight:600;text-align:center;letter-spacing:.02em;
+  font-variant-numeric:tabular-nums;padding:9px 12px;border-radius:9px;
   background:var(--s0);border:1px solid var(--border);color:var(--text);width:100%}
 .zip:hover{border-color:var(--border-strong)}
-.zip-city{font-size:12.5px;color:var(--muted);text-align:center;min-height:19px}
+.zip-city{font-size:11.5px;color:var(--muted);text-align:center;min-height:16px}
 .zip-city.unknown{color:var(--warning)}
 .lane-arrow{color:var(--dim);font-size:17px;padding-top:4px}
 @media(max-width:620px){.lane-row{grid-template-columns:1fr}.lane-arrow{display:none}}
@@ -80,11 +80,11 @@ h1,h2,h3{letter-spacing:-.025em;font-weight:600;line-height:1.2;margin:0}
 .edit-btn:hover{color:var(--text);border-color:var(--border-strong)}
 .zip.on{background:var(--s2);border-color:var(--green-soft)}
 .zip.on:focus{outline:2px solid var(--green);outline-offset:1px}
-.frow{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+.frow{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
 .field{display:grid;gap:5px;flex:1 1 150px}
 .label{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--dim)}
 .label .req{color:var(--green)}
-.input{font:inherit;font-size:13.5px;padding:9px 12px;border-radius:var(--radius-sm);background:var(--s0);border:1px solid var(--border);color:var(--text);width:100%}
+.input{font:inherit;font-size:13px;padding:7px 10px;border-radius:var(--radius-sm);background:var(--s0);border:1px solid var(--border);color:var(--text);width:100%}
 .input:hover{border-color:var(--border-strong)}
 select.input{appearance:none;cursor:pointer}
 .ghost{font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;background:transparent;border:none;color:var(--muted)}
@@ -764,9 +764,9 @@ function form() {
     + dimField('Length (in)', 'ln', state.l)
     + dimField('Width (in)', 'wd', state.w)
     + dimField('Height (in)', 'ht', state.h)
+    + '<button class="btn" type="button" data-quote="1">Get rates</button>'
+    + '<button class="ghost" type="button">+ Add package</button>'
     + '</div>'
-    + '<div class="frow"><button class="btn" type="button" data-quote="1">Get rates</button>'
-    + '<button class="ghost" type="button">+ Add package</button></div>'
     + '</div>';
 }
 const dimField = (label, id, value) =>
