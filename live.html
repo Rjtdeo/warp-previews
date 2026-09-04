@@ -93,7 +93,12 @@ select.input{appearance:none;cursor:pointer}
 /* ── results ──────────────────────────────────────────────────────── */
 .res-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
 .res-head h2{font-size:18px}
-.res-sub{color:var(--muted);font-size:12.5px}
+.res-sub{color:var(--muted);font-size:13px}
+.lane-to{color:var(--dim);padding:0 3px}
+.facts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.fact{font-size:11px;font-weight:600;color:var(--muted);background:var(--s2);
+  border:1px solid var(--border);border-radius:6px;padding:3px 9px;white-space:nowrap}
+.fact b{color:var(--text-2);font-weight:600}
 .sep-dot{display:inline-block;width:4px;height:4px;border-radius:50%;background:var(--green);vertical-align:middle;margin:0 8px 2px}
 .count{text-align:right;font-size:12.5px;color:var(--text-2);white-space:nowrap}
 .count b{color:var(--green);font-size:17px;font-family:var(--mono)}
@@ -623,15 +628,28 @@ function results() {
     + '</div>';
 
   /* Warp-green dot instead of a middot, same as the track page's Sep. */
-  const dot = '<span class="sep-dot" aria-hidden="true"></span>';
-  const pkgBits = SC.lane.packages.split(' · ').map(esc).join(dot);
+  /* Two kinds of fact, told two ways. Where the parcel goes is a sentence
+     and reads as one; what the parcel IS is data, and reads as data. Strung
+     together on a single line with separator dots, the punctuation was
+     carrying all the structure and every fact looked equally important. */
   const l = state.lane || {};
-  const laneText = (l.fromCity || l.fromZip) + ' ' + l.fromZip + ' → ' + (l.toCity || l.toZip) + ' ' + l.toZip;
-  const pkgText = '1 package' + dot + state.weight + ' lb'
-    + (BILLABLE ? dot + 'billed as ' + BILLABLE + ' lb (dimensional)' : '')
-    + (LANE_MILES != null ? dot + LANE_MILES.toLocaleString() + ' mi' : '');
-  const head = '<div class="res-head"><div><h2>Rates</h2><div class="res-sub">'
-    + esc(laneText) + dot + pkgText + '</div></div>'
+  const laneText = (l.fromCity || l.fromZip) + ' ' + l.fromZip
+    + ' <span class="lane-to">→</span> ' + (l.toCity || l.toZip) + ' ' + l.toZip;
+
+  const dims = [state.l, state.w, state.h].every(Boolean)
+    ? state.l + ' × ' + state.w + ' × ' + state.h + ' in' : null;
+  const facts = [
+    '1 package',
+    '<b>' + state.weight + ' lb</b>',
+    BILLABLE ? 'billed as <b>' + BILLABLE + ' lb</b> dimensional' : null,
+    dims,
+    LANE_MILES != null ? '<b>' + LANE_MILES.toLocaleString() + '</b> mi' : null,
+  ].filter(Boolean);
+
+  const head = '<div class="res-head"><div><h2>Rates</h2>'
+    + '<div class="res-sub">' + laneText + '</div>'
+    + '<div class="facts">' + facts.map((f) => '<span class="fact">' + f + '</span>').join('') + '</div>'
+    + '</div>'
     + '<div class="count"><b>' + list.length + '</b> of ' + MODEL.totalCount + ' shown'
     + '<span class="sub2">cheapest, fastest and balanced</span></div></div>';
 
