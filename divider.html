@@ -1,0 +1,130 @@
+<title>Panel Divider Options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+:root{
+  --green:#3ddc84;--green-glow:rgba(61,220,132,.1);--green-soft:rgba(61,220,132,.28);
+  --s0:#121518;--s1:#161a1f;--s2:#1b2027;--s3:#222731;--s4:#2f3641;
+  --border:#2a303a;--border-subtle:#222731;--border-strong:#383f4c;
+  --text:#f0f2f5;--text-2:#d5dae1;--muted:#a2abb6;--dim:#78828e;
+  --font:'Inter',system-ui,-apple-system,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--s0);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.6;letter-spacing:-.006em;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1060px;margin:0 auto;padding:44px 24px 90px}
+.eyebrow{font-size:10px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--green);margin-bottom:10px}
+h1{font-size:27px;letter-spacing:-.025em;margin:0 0 10px}
+.lede{color:var(--muted);max-width:70ch;margin:0 0 8px}
+.why{color:var(--muted);max-width:70ch;margin:0 0 30px;padding:13px 15px;background:var(--s1);border:1px solid var(--border);border-radius:12px;font-size:13px}
+.why b{color:var(--text)}
+.opt{padding:22px 0 26px;border-top:1px solid var(--border)}
+.opt-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.opt-head h2{font-size:14px;margin:0;color:var(--text-2)}
+.tag{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--green);background:var(--green-glow);border:1px solid var(--green-soft);border-radius:5px;padding:2px 7px}
+.opt-note{font-size:12.5px;color:var(--dim);flex:1 1 330px;min-width:0}
+
+.panel{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:14px 16px}
+.title{font-size:17px;font-weight:600;letter-spacing:-.025em}
+.lane{font-size:12.5px;color:var(--muted);margin-top:2px}
+.lane .ar{color:var(--dim);padding:0 3px}
+.facts{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.fact{font-size:11px;font-weight:600;color:var(--muted);background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:3px 9px}
+.fact b{color:var(--text-2)}
+.hrule{height:1px;background:var(--border);margin:12px -16px 11px}
+.hrule.green{background:var(--green-soft)}
+.chips{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.chip{font:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:5px 11px;border-radius:999px;background:transparent;color:var(--muted);border:1px solid transparent}
+.chip:hover{color:var(--text);background:var(--s2)}
+.chip.on{background:var(--green-glow);color:var(--green);border-color:var(--green-soft)}
+
+/* the dividers under test */
+.d-green{width:1px;align-self:stretch;background:var(--green);margin:-11px 12px -14px;flex:none}
+.d-grey{width:1px;align-self:stretch;background:var(--border);margin:-11px 12px -14px;flex:none}
+.d-fade{width:1px;align-self:stretch;margin:-11px 12px -14px;flex:none;
+  background:linear-gradient(to bottom,transparent,var(--green) 35%,var(--green) 65%,transparent)}
+.d-short{width:1px;height:20px;background:var(--green);margin:0 14px;flex:none}
+.d-gap{width:30px;flex:none}
+.klabel{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);margin-right:4px}
+.klabel.second{margin-left:22px}
+/* split into two cells */
+.cells{display:flex;margin:-11px -16px -14px}
+.cell{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:11px 16px 14px}
+.cell + .cell{border-left:1px solid var(--border)}
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">Warp Portal · /portal/parcel · panel divider</div>
+  <h1>Dividing the two chip groups inside the panel</h1>
+  <p class="lede">Same panel, same chips. Only the divider between <em>DHL</em> and <em>Any service</em> changes.</p>
+  <div class="why">
+    <b>What the last change exposed:</b> the vertical rule is green and the horizontal it now lands on
+    is grey, so two lines that visibly meet are different colours. That mismatch is the thing worth
+    fixing — either they match, or the vertical stops pretending to be part of the same structure.
+  </div>
+  <div id="opts"></div>
+</div>
+
+<script>
+const CARRIERS = ['All carriers', 'UPS', 'USPS', 'FedEx', 'Sway', 'DHL'];
+const SERVICES = ['Any service', 'Guaranteed time', 'Estimated'];
+const chip = (t, on) => '<button class="chip' + (on ? ' on' : '') + '" type="button">' + t + '</button>';
+const cs = () => CARRIERS.map((c, i) => chip(c, i === 0)).join('');
+const ss = () => SERVICES.map((c, i) => chip(c, i === 0)).join('');
+const header = '<div class="title">Rates</div>'
+  + '<div class="lane">Los Angeles, CA 90013 <span class="ar">→</span> Chicago, IL 60607</div>'
+  + '<div class="facts"><span class="fact">1 package</span><span class="fact"><b>5 lb</b></span>'
+  + '<span class="fact">12 × 9 × 4 in</span><span class="fact"><b>1,741</b> mi</span></div>';
+
+const body = (rule, sep) => '<div class="panel">' + header + rule
+  + '<div class="chips">' + cs() + sep + ss() + '</div></div>';
+
+const OPTS = [
+  { n:'A · Green rule, grey horizontal', tag:'Now',
+    note:'Two lines meet at right angles in two different colours. It is the mismatch, not the green, that catches the eye.',
+    html: body('<div class="hrule"></div>', '<span class="d-green"></span>') },
+
+  { n:'B · Both grey', tag:'Recommended',
+    note:'The vertical matches the horizontal, so the panel reads as one piece of structure. Green is left to mean selected, which is all it means anywhere else on the row.',
+    html: body('<div class="hrule"></div>', '<span class="d-grey"></span>') },
+
+  { n:'C · Both green', tag:'',
+    note:'Match the other way: the header divider goes green too. Consistent, and considerably more green on a panel whose only other green is the two selected chips.',
+    html: body('<div class="hrule green"></div>', '<span class="d-green"></span>') },
+
+  { n:'D · Green fading at both ends', tag:'',
+    note:'Full height but dissolving before it reaches either horizontal, so nothing has to match. Divides without claiming to be part of the frame.',
+    html: body('<div class="hrule"></div>', '<span class="d-fade"></span>') },
+
+  { n:'E · Short rule, chip height', tag:'',
+    note:'Sits with the chips rather than spanning the panel. Divides the row without touching the structure at all.',
+    html: body('<div class="hrule"></div>', '<span class="d-short"></span>') },
+
+  { n:'F · Two cells', tag:'',
+    note:'The row is split into two cells with a shared border, the way a table divides. The rule is the edge of a region rather than a mark dropped between two chips.',
+    html: '<div class="panel">' + header + '<div class="hrule"></div>'
+      + '<div class="cells"><span class="cell">' + cs() + '</span><span class="cell">' + ss() + '</span></div></div>' },
+
+  { n:'G · No rule, labels instead', tag:'',
+    note:'Names the two groups and drops the line. Nothing to colour-match, and the row explains itself.',
+    html: body('<div class="hrule"></div>', '') .replace('<div class="chips">', '<div class="chips"><span class="klabel">Carrier</span>')
+      .replace('<button class="chip on" type="button">Any service</button>',
+        '<span class="klabel second">Service</span><button class="chip on" type="button">Any service</button>') },
+];
+
+document.getElementById('opts').innerHTML = OPTS.map((o) =>
+  '<div class="opt"><div class="opt-head"><h2>' + o.n + '</h2>'
+  + (o.tag ? '<span class="tag">' + o.tag + '</span>' : '')
+  + '<span class="opt-note">' + o.note + '</span></div>' + o.html + '</div>').join('');
+
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('.chip');
+  if (!b) return;
+  const isSvc = SERVICES.includes(b.textContent);
+  [...b.closest('.opt').querySelectorAll('.chip')].forEach((x) => {
+    if (SERVICES.includes(x.textContent) === isSvc) x.classList.remove('on');
+  });
+  b.classList.add('on');
+});
+</script>
