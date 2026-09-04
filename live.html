@@ -91,7 +91,7 @@ select.input{appearance:none;cursor:pointer}
 .ghost:hover{color:var(--text)}
 
 /* ── results ──────────────────────────────────────────────────────── */
-.res-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.res-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
 .res-head h2{font-size:18px}
 .res-sub{color:var(--muted);font-size:13px}
 .lane-to{color:var(--dim);padding:0 3px}
@@ -105,7 +105,15 @@ select.input{appearance:none;cursor:pointer}
 .count .sub2{display:block;font-size:11px;color:var(--dim)}
 
 /* the chosen treatment: bare chips, no container */
+.res-panel{background:var(--s1);border:1px solid var(--border);border-radius:14px;
+  padding:14px 16px;margin-bottom:18px}
+.res-rule{height:1px;background:var(--border);margin:12px -16px 11px}
 .chips{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+/* Inside a panel a filled chip reads as a card within a card, so the fill
+   comes off and only the selected one keeps a background. */
+.res-panel .chip-f{background:transparent}
+.res-panel .chip-f:hover{background:var(--s2)}
+.res-panel .chip-f[aria-selected="true"]{background:var(--green-glow)}
 /* A dot, not a hairline. This was a 1px green rule and a single pixel of
    colour at 18px tall just reads as a dark line — the green was there and
    invisible. Same 4px dot as the lane line above, so both separators on the
@@ -680,8 +688,15 @@ function results() {
     + '<div class="count"><b>' + list.length + '</b> of ' + MODEL.totalCount + ' shown'
     + '<span class="sub2">cheapest, fastest and balanced</span></div></div>';
 
+  /* One panel for everything that describes this result set — title, lane,
+     package facts, count, filters. On its own a box around six chips reads as
+     empty; sharing it with the header gives the container something to hold
+     and turns three loose bands into one block above the cards. */
+  const panel = (extra) => '<div class="res-panel">' + head
+    + '<div class="res-rule"></div>' + chips + '</div>' + extra;
+
   if (!list.length) {
-    return head + chips + '<p class="empty">No rates match those filters. Clear one to see the rest.</p>';
+    return panel('<p class="empty">No rates match those filters. Clear one to see the rest.</p>');
   }
 
   const t = tiersOf(list);
@@ -701,7 +716,7 @@ function results() {
       + '</div>'
       + (restN ? '<button class="fold" type="button" data-more="all">'
         + (state.more.all ? '▾ Show fewer' : '▸ Show ' + restN + ' more') + '</button>' : '');
-    return head + chips + merged;
+    return panel(merged);
   }
 
   const body = '<div class="stacks">' + TIERS.map((tier) => {
@@ -720,7 +735,7 @@ function results() {
       + '</section>';
   }).join('') + '</div>';
 
-  return head + chips + body;
+  return panel(body);
 }
 
 function render() {
