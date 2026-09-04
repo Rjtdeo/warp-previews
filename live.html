@@ -778,20 +778,14 @@ function render() {
 /* The quote form, arriving with the lane already answered — the hand-off
    from the dashboard widget. Only the package is left to fill in. */
 /**
- * `trailing` rides in the label row beside the label. Edit lane used to be
- * absolutely positioned in the card's top-right corner, which meant every
- * time the layout tightened it landed on the To field again — it has been
- * nudged twice already. In the label row it cannot overlap the input at any
- * size, because it is laid out beside it rather than floating over it.
- *
- * A <div> rather than a <label>, since a button nested inside a label would
- * also focus the input when clicked. The input keeps its name via aria-label.
- */
-/**
  * Always editable. There used to be an Edit lane button that unlocked these,
  * which meant two clicks and a mode to change five digits — and a field that
  * looks like a field but refuses typing is a small lie. Click the ZIP and
  * type; the city resolves underneath as you go.
+ *
+ * A <div> rather than a <label> because the label row once held a button, and
+ * a button inside a label also focuses the input. The input carries its own
+ * name via aria-label either way.
  */
 function laneField(label, zip, city, which) {
   return '<div class="lane-field">'
