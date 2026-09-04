@@ -66,7 +66,10 @@ h1,h2,h3{letter-spacing:-.025em;font-weight:600;line-height:1.2;margin:0}
 .zip{font:inherit;font-size:15px;font-weight:600;text-align:center;letter-spacing:.02em;
   font-variant-numeric:tabular-nums;padding:9px 12px;border-radius:9px;
   background:var(--s0);border:1px solid var(--border);color:var(--text);width:100%}
-.zip:hover{border-color:var(--border-strong)}
+.zip{cursor:text}
+.zip:hover{border-color:var(--border-strong);background:var(--s1)}
+.zip:focus{outline:none;border-color:var(--green-soft);background:var(--s1);
+  box-shadow:0 0 0 3px var(--green-glow)}
 .zip-city{font-size:11.5px;color:var(--muted);text-align:center;min-height:16px}
 .zip-city.unknown{color:var(--warning)}
 .lane-arrow{color:var(--dim);font-size:17px;padding-top:4px}
@@ -75,11 +78,6 @@ h1,h2,h3{letter-spacing:-.025em;font-weight:600;line-height:1.2;margin:0}
    the top of the card for one small button, and the band read as a gap. The
    label line beside "To" is already empty, so it sits there instead. */
 .lane-top{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:22px}
-.edit-btn{font:inherit;font-size:11px;font-weight:600;cursor:pointer;padding:2px 10px;
-  border-radius:999px;background:transparent;color:var(--muted);border:1px solid var(--border)}
-.edit-btn:hover{color:var(--text);border-color:var(--border-strong)}
-.zip.on{background:var(--s2);border-color:var(--green-soft)}
-.zip.on:focus{outline:2px solid var(--green);outline-offset:1px}
 .frow{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
 .field{display:grid;gap:5px;flex:1 1 150px}
 .label{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--dim)}
@@ -558,7 +556,7 @@ const PRESETS = [
   { label: 'Custom dimensions', hint: 'enter your own',   l: '',     w: '',    h: '' },
 ];
 
-const state = { carrier: 'all', gtd: 'all', more: {}, editingLane: false, lane: null,
+const state = { carrier: 'all', gtd: 'all', more: {}, lane: null,
   weight: 5, preset: 'Small box', l: '12', w: '9', h: '4' };
 
 /* Stand-in for components/portal/zip-autofill.ts, which calls
@@ -789,13 +787,17 @@ function render() {
  * A <div> rather than a <label>, since a button nested inside a label would
  * also focus the input when clicked. The input keeps its name via aria-label.
  */
-function laneField(label, zip, city, which, editing, trailing) {
+/**
+ * Always editable. There used to be an Edit lane button that unlocked these,
+ * which meant two clicks and a mode to change five digits — and a field that
+ * looks like a field but refuses typing is a small lie. Click the ZIP and
+ * type; the city resolves underneath as you go.
+ */
+function laneField(label, zip, city, which) {
   return '<div class="lane-field">'
-    + '<div class="lane-top"><span class="lane-label">' + label + '</span>'
-    + (trailing || '') + '</div>'
-    + '<input class="zip' + (editing ? ' on' : '') + '" data-zip="' + which + '" value="' + esc(zip)
-    + '" inputmode="numeric" maxlength="5" aria-label="' + label + ' ZIP code"'
-    + (editing ? '' : ' readonly') + '>'
+    + '<div class="lane-top"><span class="lane-label">' + label + '</span></div>'
+    + '<input class="zip" data-zip="' + which + '" value="' + esc(zip)
+    + '" inputmode="numeric" maxlength="5" aria-label="' + label + ' ZIP code">'
     + '<span class="zip-city" data-city="' + which + '">' + esc(city) + '</span></div>';
 }
 
@@ -813,7 +815,6 @@ function form() {
     };
   }
   const { fromZip, toZip, fromCity, toCity } = state.lane;
-  const editing = state.editingLane;
   return '<div class="glass">'
     /* Just the control. The banner that used to sit here announced that the
        ZIPs came from the dashboard, which the customer already knows — they
@@ -821,11 +822,9 @@ function form() {
        The button carries what is actionable; nothing carries the rest. */
 
     + '<div class="lane-row">'
-    + laneField('From', fromZip, fromCity, 'from', editing)
+    + laneField('From', fromZip, fromCity, 'from')
     + '<span class="lane-arrow" aria-hidden="true">→</span>'
-    + laneField('To', toZip, toCity, 'to', editing,
-        '<button class="edit-btn" type="button" data-edit="1">'
-        + (editing ? 'Done' : 'Edit lane') + '</button>')
+    + laneField('To', toZip, toCity, 'to')
     + '</div>'
     + '<div class="frow">'
     + '<label class="field" style="flex:1 1 190px"><span class="label">Package</span>'
@@ -862,24 +861,18 @@ document.addEventListener('click', (e) => {
   document.querySelectorAll('.mark.open').forEach((x) => { if (x !== mk) x.classList.remove('open'); });
   if (mk) { mk.classList.toggle('open'); return; }
 
-  const el = e.target.closest('[data-f],[data-more],[data-edit],[data-quote]');
+  const el = e.target.closest('[data-f],[data-more],[data-quote]');
   if (!el) return;
   e.preventDefault();
   if (el.dataset.quote) {
     const num = (id, dflt) => { const el = document.getElementById(id); return el ? el.value : dflt; };
     state.weight = Math.max(0.1, Number(num('wt', state.weight)) || 5);
     state.l = num('ln', state.l); state.w = num('wd', state.w); state.h = num('ht', state.h);
-    state.editingLane = false;
     requote();
   }
-  else if (el.dataset.edit) state.editingLane = !state.editingLane;
   else if (el.dataset.f) { state[el.dataset.f] = el.dataset.v; state.more = {}; }
   else state.more[el.dataset.more] = !state.more[el.dataset.more];
   render();
-  if (state.editingLane) {
-    const first = document.querySelector('.zip.on');
-    if (first) { first.focus(); first.select(); }
-  }
 });
 
 /* Deliberately does NOT re-render. Rebuilding the page on every keystroke
