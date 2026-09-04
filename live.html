@@ -56,6 +56,20 @@ h1,h2,h3{letter-spacing:-.025em;font-weight:600;line-height:1.2;margin:0}
 .h1{font-size:24px}
 .sub{color:var(--muted);font-size:13.5px;margin:5px 0 0;max-width:640px}
 .glass{background:var(--s1);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;display:grid;gap:14px}
+/* Lane control, matching customer.wearewarp.com/dashboard/freight-quote:
+   the ZIP is what you type and it sits centred in the box; the city it
+   resolves to is confirmation, so it goes underneath in muted text rather
+   than being crammed into the field. */
+.lane-row{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:14px;align-items:center}
+.lane-field{display:grid;gap:7px}
+.lane-label{font-size:13.5px;color:var(--text-2);font-weight:500}
+.zip{font:inherit;font-size:17px;font-weight:600;text-align:center;letter-spacing:.02em;
+  font-variant-numeric:tabular-nums;padding:13px 12px;border-radius:10px;
+  background:var(--s0);border:1px solid var(--border);color:var(--text);width:100%}
+.zip:hover{border-color:var(--border-strong)}
+.zip-city{font-size:12.5px;color:var(--muted);text-align:center;min-height:19px}
+.lane-arrow{color:var(--dim);font-size:17px;padding-top:4px}
+@media(max-width:620px){.lane-row{grid-template-columns:1fr}.lane-arrow{display:none}}
 .prefill{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--green);background:var(--green-glow);border:1px solid var(--green-soft);border-radius:var(--radius-sm);padding:7px 11px;justify-self:start}
 .frow{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
 .field{display:grid;gap:5px;flex:1 1 150px}
@@ -494,14 +508,29 @@ function render() {
 
 /* The quote form, arriving with the lane already answered — the hand-off
    from the dashboard widget. Only the package is left to fill in. */
+function laneField(label, zip, city) {
+  return '<label class="lane-field"><span class="lane-label">' + label + '</span>'
+    + '<input class="zip" value="' + esc(zip) + '" inputmode="numeric" readonly>'
+    + '<span class="zip-city">' + esc(city) + '</span></label>';
+}
+
 function form() {
-  const [fromCity, fromZip] = splitLoc(SC.lane.from);
-  const [toCity, toZip] = splitLoc(SC.lane.to);
+  /* Same parameter names the customer portal already uses on
+     /dashboard/freight-quote — originZip, destinationZip, oc, dc — so the
+     dashboard widget can hand off to either surface with one link shape. */
+  const q = new URLSearchParams(location.search);
+  const [laneFromCity, laneFromZip] = splitLoc(SC.lane.from);
+  const [laneToCity, laneToZip] = splitLoc(SC.lane.to);
+  const fromZip = q.get('originZip') || laneFromZip;
+  const toZip = q.get('destinationZip') || laneToZip;
+  const fromCity = q.get('oc') || laneFromCity;
+  const toCity = q.get('dc') || laneToCity;
   return '<div class="glass">'
     + '<div class="prefill">✓ Origin and destination came from your dashboard — just confirm the package</div>'
-    + '<div class="frow">'
-    + fld('From <span class="req">*</span>', fromCity + ' ' + fromZip, 2)
-    + fld('To <span class="req">*</span>', toCity + ' ' + toZip, 2)
+    + '<div class="lane-row">'
+    + laneField('From', fromZip, fromCity)
+    + '<span class="lane-arrow" aria-hidden="true">→</span>'
+    + laneField('To', toZip, toCity)
     + '</div>'
     + '<div class="frow">'
     + '<label class="field" style="flex:1 1 170px"><span class="label">Package</span>'
