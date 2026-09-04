@@ -724,6 +724,13 @@ function results() {
 }
 
 function render() {
+  /* .main is the scrolling element, and render() rebuilds it. Replacing the
+     container throws its scrollTop away, so choosing a carrier from halfway
+     down the results threw you back to the top of the page — away from the
+     thing you had just clicked. Carry the position across the swap. */
+  const prev = document.querySelector('.main');
+  const keepY = prev ? prev.scrollTop : 0;
+
   document.getElementById('app').innerHTML =
     '<div class="shell"><aside class="sidebar">'
     + '<div class="side-logo"><span class="logo">WARP</span></div>'
@@ -740,6 +747,12 @@ function render() {
     + '<div><h1 class="h1">Parcel</h1><p class="sub">Rate-shop every connected carrier from city, '
     + 'state, and ZIP, then buy the label right here.</p></div>'
     + form() + results() + '</div></div></div></div>';
+
+  /* Set synchronously, before paint, so there is no visible jump-and-return.
+     The browser clamps it if the new content is shorter — filtering down to
+     three cards cannot leave you scrolled past the end. */
+  const next = document.querySelector('.main');
+  if (next) next.scrollTop = keepY;
 }
 
 /* The quote form, arriving with the lane already answered — the hand-off
