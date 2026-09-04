@@ -528,6 +528,7 @@ function quoteFor(fromZip, toZip, lbs, dims) {
 const SC = SCENARIOS.find((s) => s.id === LANE_ID);
 let MODEL = buildModel(SC);
 let LANE_MILES = null;
+let quoteTimer = null;   // debounce for live re-quoting while typing
 let BILLABLE = null;   // set only when dimensional weight beats actual
 
 /* Re-quote from whatever is in the lane fields right now. */
@@ -673,8 +674,11 @@ function results() {
      together on a single line with separator dots, the punctuation was
      carrying all the structure and every fact looked equally important. */
   const l = state.lane || {};
-  const laneText = (l.fromCity || l.fromZip) + ' ' + l.fromZip
-    + ' <span class="lane-to">→</span> ' + (l.toCity || l.toZip) + ' ' + l.toZip;
+  /* City then ZIP — but an unknown ZIP has no city, and falling back to the
+     ZIP printed it twice ("→ 44444 44444"). */
+  const place = (city, zip) => (city ? esc(city) + ' ' : '') + esc(zip);
+  const laneText = place(l.fromCity, l.fromZip)
+    + ' <span class="lane-to">→</span> ' + place(l.toCity, l.toZip);
 
   const dims = [state.l, state.w, state.h].every(Boolean)
     ? state.l + ' × ' + state.w + ' × ' + state.h + ' in' : null;
@@ -766,7 +770,7 @@ function render() {
     + '<div class="main"><div class="inner">'
     + '<div><h1 class="h1">Parcel</h1><p class="sub">Rate-shop every connected carrier from city, '
     + 'state, and ZIP, then buy the label right here.</p></div>'
-    + form() + results() + '</div></div></div></div>';
+    + form() + '<div id="results">' + results() + '</div></div></div></div></div>';
 
   /* Set synchronously, before paint, so there is no visible jump-and-return.
      The browser clamps it if the new content is shorter — filtering down to
@@ -885,6 +889,21 @@ document.addEventListener('input', (e) => {
   if (out) {
     out.textContent = city || (zip.length === 5 ? 'ZIP not recognised — rates will still be requested' : '');
     out.classList.toggle('unknown', !city && zip.length === 5);
+  }
+
+  /* Re-quote as soon as the ZIP is complete. Without this the rates below sat
+     unchanged while the field above them showed a different lane — stale, and
+     silently so, since removing Edit lane also removed the moment that used
+     to mean "done, now fetch".
+     Only #results is replaced, never the form: rebuilding the whole page here
+     would destroy the input being typed into and take the caret with it. */
+  clearTimeout(quoteTimer);
+  if (/^\d{5}$/.test(state.lane.fromZip) && /^\d{5}$/.test(state.lane.toZip)) {
+    quoteTimer = setTimeout(() => {
+      requote();
+      const box = document.getElementById('results');
+      if (box) box.innerHTML = results();
+    }, 250);
   }
 });
 
