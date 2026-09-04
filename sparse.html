@@ -194,7 +194,7 @@ const r = (id, carrier, service, amount, days, guaranteed = false, warnings = []
 
 const LONG_RATES = [
   r('l-01', 'ups', 'UPS® Ground Saver', 12.85, 5),
-  r('l-02', 'stamps_com', 'USPS Ground Advantage', 13.40, 5, false, ['No Saturday delivery on this service.']),
+  r('l-02', 'stamps_com', 'USPS Ground Advantage', 13.40, 5),
   r('l-03', 'fedex', 'FedEx Ground® Economy', 14.20, 6),
   r('l-04', 'ups', 'UPS® Ground', 16.75, 4),
   r('l-05', 'fedex', 'FedEx Home Delivery®', 17.90, 4),
@@ -217,9 +217,9 @@ const LONG_RATES = [
 
 const METRO_RATES = [
   r('m-01', 'ups', 'UPS® Ground Saver', 6.40, 2),
-  r('m-02', 'stamps_com', 'USPS Ground Advantage', 6.65, 2, false, ['No Saturday delivery on this service.']),
+  r('m-02', 'stamps_com', 'USPS Ground Advantage', 6.65, 2),
   r('m-03', 'ups', 'UPS® Ground', 7.41, 1),
-  r('m-04', 'fedex', 'FedEx Ground® Economy', 8.90, 3, false, ['Final mile handed to USPS; no delivery appointment.']),
+  r('m-04', 'fedex', 'FedEx Ground® Economy', 8.90, 3),
   r('m-05', 'stamps_com', 'USPS Priority Mail®', 9.85, 2),
   r('m-06', 'fedex', 'FedEx Home Delivery®', 10.12, 2),
   r('m-07', 'ups', 'UPS 3 Day Select®', 13.20, 3, true),

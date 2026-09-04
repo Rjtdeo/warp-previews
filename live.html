@@ -196,7 +196,7 @@ const r = (id, carrier, service, amount, days, guaranteed = false, warnings = []
 
 const LONG_RATES = [
   r('l-01', 'ups', 'UPS® Ground Saver', 12.85, 5),
-  r('l-02', 'stamps_com', 'USPS Ground Advantage', 13.40, 5, false, ['No Saturday delivery on this service.']),
+  r('l-02', 'stamps_com', 'USPS Ground Advantage', 13.40, 5),
   r('l-03', 'fedex', 'FedEx Ground® Economy', 14.20, 6),
   r('l-04', 'ups', 'UPS® Ground', 16.75, 4),
   r('l-05', 'fedex', 'FedEx Home Delivery®', 17.90, 4),
@@ -219,9 +219,9 @@ const LONG_RATES = [
 
 const METRO_RATES = [
   r('m-01', 'ups', 'UPS® Ground Saver', 6.40, 2),
-  r('m-02', 'stamps_com', 'USPS Ground Advantage', 6.65, 2, false, ['No Saturday delivery on this service.']),
+  r('m-02', 'stamps_com', 'USPS Ground Advantage', 6.65, 2),
   r('m-03', 'ups', 'UPS® Ground', 7.41, 1),
-  r('m-04', 'fedex', 'FedEx Ground® Economy', 8.90, 3, false, ['Final mile handed to USPS; no delivery appointment.']),
+  r('m-04', 'fedex', 'FedEx Ground® Economy', 8.90, 3),
   r('m-05', 'stamps_com', 'USPS Priority Mail®', 9.85, 2),
   r('m-06', 'fedex', 'FedEx Home Delivery®', 10.12, 2),
   r('m-07', 'ups', 'UPS 3 Day Select®', 13.20, 3, true),
@@ -427,12 +427,8 @@ function addBusinessDays(iso, n) {
 /* Calibrated against the two fixtures: ground = 3.17 + 0.00397/mi + 0.55/lb. */
 const SERVICES = [
   ['ups', 'UPS® Ground Saver', 1.00, 'ground+1', false],
-  /* PLACEHOLDER TEXT. ShipStation returns real warning_messages per rate and
-     route.ts:138 already forwards them, but nothing in the repo records what
-     they say, so these two are written to be plausible — not quoted. Replace
-     with live strings before anyone treats them as carrier policy. */
-  ['stamps_com', 'USPS Ground Advantage', 1.04, 'ground+1', false, ['No Saturday delivery on this service.']],
-  ['fedex', 'FedEx Ground® Economy', 1.11, 'ground+2', false, ['Final mile handed to USPS; no delivery appointment.']],
+  ['stamps_com', 'USPS Ground Advantage', 1.04, 'ground+1'],
+  ['fedex', 'FedEx Ground® Economy', 1.11, 'ground+2'],
   ['ups', 'UPS® Ground', 1.31, 'ground', false],
   ['fedex', 'FedEx Home Delivery®', 1.40, 'ground', false],
   ['stamps_com', 'USPS Priority Mail®', 1.53, 'cap3', false],
