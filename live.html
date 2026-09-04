@@ -254,7 +254,7 @@ const SCENARIOS = [
     lane: { from: 'Los Angeles, CA 90013', to: 'San Diego, CA 92101', packages: '1 package · 5 lb · 12 × 9 × 4 in' },
     tests: 'Twenty-three rates that nearly all collapse — ground is already next-day, and Sway beats the express tier. Tests sparsity.',
     rates: METRO_RATES,
-    sway: { rates: [{ service_type: 'EXPEDITED', transit_days: 1, total_amount: { currency: 'usd', amount: 12.50 } }], dropOffName: 'Warp LAX Hub' },
+    sway: { rates: [{ service_type: 'EXPEDITED', transit_days: 1, total_amount: { currency: 'usd', amount: 12.50 } }], dropOffName: 'Sway Santa Ana', dropOffCutoff: '7:00pm for NorCal and TX' },
   },
 ];
 
@@ -282,7 +282,8 @@ function buildModel(scenario) {
       key: 'sway-' + x.service_type, carrier: 'Sway',
       service: x.service_type[0] + x.service_type.slice(1).toLowerCase() + ' metro',
       price: x.total_amount.amount, days: x.transit_days, arrivalISO: null, guaranteed: 1,
-      conditions: ['Drop-off required at ' + scenario.sway.dropOffName + ', cutoff 2:00pm'],
+      conditions: ['Drop-off required at ' + scenario.sway.dropOffName
+          + ', cutoff ' + (scenario.sway.dropOffCutoff || '—')],
     })) : []),
     ...scenario.rates.map((x) => ({
       key: x.rate_id, carrier: carrierLabel(x.carrier_code), service: x.service_type,
@@ -426,6 +427,10 @@ function addBusinessDays(iso, n) {
 /* Calibrated against the two fixtures: ground = 3.17 + 0.00397/mi + 0.55/lb. */
 const SERVICES = [
   ['ups', 'UPS® Ground Saver', 1.00, 'ground+1', false],
+  /* PLACEHOLDER TEXT. ShipStation returns real warning_messages per rate and
+     route.ts:138 already forwards them, but nothing in the repo records what
+     they say, so these two are written to be plausible — not quoted. Replace
+     with live strings before anyone treats them as carrier policy. */
   ['stamps_com', 'USPS Ground Advantage', 1.04, 'ground+1', false, ['No Saturday delivery on this service.']],
   ['fedex', 'FedEx Ground® Economy', 1.11, 'ground+2', false, ['Final mile handed to USPS; no delivery appointment.']],
   ['ups', 'UPS® Ground', 1.31, 'ground', false],
@@ -490,11 +495,22 @@ function quoteFor(fromZip, toZip, lbs, dims) {
 
   /* Sway needs a hub in the origin state and only sells its own metro. */
   const st = stateOfZip(fromZip);
-  const hub = st === 'CA' ? 'Warp LAX Hub' : st === 'NJ' ? 'Sway Elmwood Park' : null;
+  /* Real facilities, from src/lib/shipsway/facilities.ts. An earlier version
+     of this mock said "Warp LAX Hub, cutoff 2:00pm" — a hub that does not
+     exist and a cutoff nobody set. The customer is being told where to drive
+     a parcel; inventing that address is not a harmless placeholder. The line
+     is built the way swayDropOffSummary() builds it: name, then the first
+     clause of the cutoff. */
+  const HUBS = {
+    CA: { name: 'Sway Santa Ana', cutoff: '7:00pm for NorCal and TX' },
+    NJ: { name: 'Sway Elmwood Park', cutoff: '8:00pm' },
+  };
+  const hubInfo = HUBS[st] || null;
+  const hub = hubInfo ? hubInfo.name : null;
   const sway = (hub && mi <= 150 && w <= 25)
     ? { rates: [{ service_type: 'EXPEDITED', transit_days: 1,
         total_amount: { currency: 'usd', amount: Math.round((9 + 0.03 * mi) * 100) / 100 } }],
-        dropOffName: hub }
+        dropOffName: hub, dropOffCutoff: hubInfo.cutoff }
     : null;
 
   return { rates, sway, miles: mi, billable: Math.round(w * 10) / 10, dimApplied: dimW > actual };
