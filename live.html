@@ -429,9 +429,17 @@ const SERVICES = [
 
 const stateOfZip = (z) => (/^9[0-6]/.test(z) ? 'CA' : /^0[7-8]/.test(z) ? 'NJ' : null);
 
-function quoteFor(fromZip, toZip, lbs) {
+function quoteFor(fromZip, toZip, lbs, dims) {
   const mi = milesBetween(fromZip, toZip);
-  const w = Math.max(0.5, Number(lbs) || 5);
+  const actual = Math.max(0.5, Number(lbs) || 5);
+  /* Dimensional weight, so the dimension boxes are not decoration: a tube is
+     mostly air and carriers bill it by the space it occupies. Billable is the
+     greater of actual and L×W×H/139, the standard domestic divisor.
+     NOTE: this is a proposal, not current behaviour — the repo's README lists
+     "dim-weight audit" as roadmap and the live page bills actual weight only. */
+  const [L, W, H] = (dims || []).map((x) => Number(x) || 0);
+  const dimW = L && W && H ? (L * W * H) / 139 : 0;
+  const w = Math.max(actual, dimW);
   const groundBase = 3.17 + 0.00397 * mi + 0.55 * w;
   const groundDays = Math.min(6, Math.max(1, Math.ceil(mi / 450)));
 
@@ -469,19 +477,21 @@ function quoteFor(fromZip, toZip, lbs) {
         dropOffName: hub }
     : null;
 
-  return { rates, sway, miles: mi };
+  return { rates, sway, miles: mi, billable: Math.round(w * 10) / 10, dimApplied: dimW > actual };
 }
 
 const SC = SCENARIOS.find((s) => s.id === LANE_ID);
 let MODEL = buildModel(SC);
 let LANE_MILES = null;
+let BILLABLE = null;   // set only when dimensional weight beats actual
 
 /* Re-quote from whatever is in the lane fields right now. */
 function requote() {
   const l = state.lane;
   if (!l) return;
-  const q = quoteFor(l.fromZip, l.toZip, state.weight);
+  const q = quoteFor(l.fromZip, l.toZip, state.weight, [state.l, state.w, state.h]);
   LANE_MILES = q.miles;
+  BILLABLE = q.dimApplied ? q.billable : null;
   MODEL = buildModel({ rates: q.rates, sway: q.sway });
   state.more = {};
   /* A carrier filter can survive into a lane that carrier does not serve,
@@ -490,7 +500,19 @@ function requote() {
     state.carrier = 'all';
   }
 }
-const state = { carrier: 'all', gtd: 'all', more: {}, editingLane: false, lane: null, weight: 5 };
+/* Verbatim from ParcelClient.tsx:49-56 — picking a preset fills the
+   dimensions there too, and the mock's dropdown was doing nothing. */
+const PRESETS = [
+  { label: 'Small box',       hint: '12 × 9 × 4 in',      l: '12',   w: '9',   h: '4' },
+  { label: 'Medium box',      hint: '16 × 12 × 8 in',     l: '16',   w: '12',  h: '8' },
+  { label: 'Large box',       hint: '18 × 18 × 16 in',    l: '18',   w: '18',  h: '16' },
+  { label: 'Padded envelope', hint: '12.5 × 9.5 × 1 in',  l: '12.5', w: '9.5', h: '1', weight: '1' },
+  { label: 'Tube',            hint: '38 × 6 × 6 in',      l: '38',   w: '6',   h: '6' },
+  { label: 'Custom dimensions', hint: 'enter your own',   l: '',     w: '',    h: '' },
+];
+
+const state = { carrier: 'all', gtd: 'all', more: {}, editingLane: false, lane: null,
+  weight: 5, preset: 'Small box', l: '12', w: '9', h: '4' };
 
 /* Stand-in for components/portal/zip-autofill.ts, which calls
    /api/fulfillment/parcel/zip-lookup. A static page has no endpoint, so a
@@ -606,6 +628,7 @@ function results() {
   const l = state.lane || {};
   const laneText = (l.fromCity || l.fromZip) + ' ' + l.fromZip + ' → ' + (l.toCity || l.toZip) + ' ' + l.toZip;
   const pkgText = '1 package' + dot + state.weight + ' lb'
+    + (BILLABLE ? dot + 'billed as ' + BILLABLE + ' lb (dimensional)' : '')
     + (LANE_MILES != null ? dot + LANE_MILES.toLocaleString() + ' mi' : '');
   const head = '<div class="res-head"><div><h2>Rates</h2><div class="res-sub">'
     + esc(laneText) + dot + pkgText + '</div></div>'
@@ -713,19 +736,25 @@ function form() {
     + laneField('To', toZip, toCity, 'to', editing)
     + '</div>'
     + '<div class="frow">'
-    + '<label class="field" style="flex:1 1 170px"><span class="label">Package</span>'
-    + '<select class="input"><option>Small box</option><option>Medium box</option>'
-    + '<option>Large box</option><option>Padded envelope</option><option>Tube</option>'
-    + '<option>Custom dimensions</option></select></label>'
-    + '<label class="field" style="flex:1 1 110px"><span class="label">Weight (lb)</span>'
-    + '<input class="input" id="wt" value="' + state.weight + '" inputmode="decimal"></label>'
-    + fld('Length (in)', '12', 1)
-    + fld('Width (in)', '9', 1) + fld('Height (in)', '4', 1)
+    + '<label class="field" style="flex:1 1 190px"><span class="label">Package</span>'
+    + '<select class="input" data-preset="1">'
+    + PRESETS.map((x) => '<option value="' + esc(x.label) + '"'
+      + (state.preset === x.label ? ' selected' : '') + '>' + esc(x.label)
+      + ' — ' + esc(x.hint) + '</option>').join('')
+    + '</select></label>'
+    + dimField('Weight (lb)', 'wt', state.weight)
+    + dimField('Length (in)', 'ln', state.l)
+    + dimField('Width (in)', 'wd', state.w)
+    + dimField('Height (in)', 'ht', state.h)
     + '</div>'
     + '<div class="frow"><button class="btn" type="button" data-quote="1">Get rates</button>'
     + '<button class="ghost" type="button">+ Add package</button></div>'
     + '</div>';
 }
+const dimField = (label, id, value) =>
+  '<label class="field" style="flex:1 1 108px"><span class="label">' + label + '</span>'
+  + '<input class="input" id="' + id + '" value="' + esc(String(value)) + '" inputmode="decimal"></label>';
+
 const fld = (label, value, grow) => '<label class="field" style="flex:' + grow + ' 1 '
   + (grow > 1 ? 200 : 110) + 'px"><span class="label">' + label + '</span>'
   + '<input class="input" value="' + esc(value) + '" readonly></label>';
@@ -736,8 +765,9 @@ document.addEventListener('click', (e) => {
   if (!el) return;
   e.preventDefault();
   if (el.dataset.quote) {
-    const wt = document.getElementById('wt');
-    if (wt) state.weight = Math.max(0.1, Number(wt.value) || 5);
+    const num = (id, dflt) => { const el = document.getElementById(id); return el ? el.value : dflt; };
+    state.weight = Math.max(0.1, Number(num('wt', state.weight)) || 5);
+    state.l = num('ln', state.l); state.w = num('wd', state.w); state.h = num('ht', state.h);
     state.editingLane = false;
     requote();
   }
