@@ -800,6 +800,21 @@ document.addEventListener('input', (e) => {
   }
 });
 
+/* Choosing a package fills the dimension boxes from PRESETS, the way
+   ParcelClient does. "Custom dimensions" carries empty strings, so it clears
+   them rather than filling them — which is the point of choosing it. */
+document.addEventListener('change', (e) => {
+  const sel = e.target.closest('[data-preset]');
+  if (!sel) return;
+  const pre = PRESETS.find((x) => x.label === sel.value);
+  state.preset = sel.value;
+  if (pre) {
+    state.l = pre.l; state.w = pre.w; state.h = pre.h;
+    if (pre.weight) state.weight = Number(pre.weight);
+  }
+  render();
+});
+
 /* form() seeds state.lane from the URL params, so it has to run before the
    first quote — otherwise the cards show fixture data while the form above
    them shows the lane from the URL, and the two disagree on first paint. */
