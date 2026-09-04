@@ -345,9 +345,150 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
    ═══════════════════════════════════════════════════════════════════ */
 
 const LANE_ID = new URLSearchParams(location.search).get('lane') === 'metro' ? 'metro' : 'long';
+
+/* ═══════════════════════════════════════════════════════════════════
+   Rates for an arbitrary lane.
+
+   The two frozen fixtures were fine while the lane was frozen too, but
+   "Get rates" that returns the same twenty rows whatever you type is a
+   dead button. This derives a rate card from distance and weight so the
+   layout can be judged on lanes nobody hard-coded.
+
+   It is a simulation, not a quote: the shape is right (ground scales with
+   distance, express does not, Sway only appears where Sway has a hub) and
+   the numbers are calibrated to the two real fixtures — LA→SD 5 lb lands
+   near $6.40 ground, LA→Chicago near $12.85. Nothing here prices anything.
+   ═══════════════════════════════════════════════════════════════════ */
+
+const ZIP_GEO = {
+  '90013': [34.05, -118.24], '90012': [34.06, -118.24], '90038': [34.09, -118.33],
+  '92101': [32.72, -117.16], '60607': [41.87, -87.65], '33136': [25.78, -80.20],
+  '33496': [26.41, -80.16], '10001': [40.75, -73.99], '07407': [40.90, -74.12],
+  '92707': [33.72, -117.87], '94105': [37.79, -122.39], '98101': [47.61, -122.33],
+  '73301': [30.27, -97.74], '30301': [33.75, -84.39], '02108': [42.36, -71.06],
+};
+/* Rough centre of each ZIP1 region, so an unlisted ZIP still lands on the
+   right side of the country instead of falling back to a single point. */
+const ZIP1_GEO = [
+  [43.0, -71.5], [42.9, -75.5], [39.0, -76.5], [35.5, -80.0], [39.5, -83.0],
+  [41.5, -89.0], [38.5, -94.5], [45.0, -100.0], [35.0, -110.0], [37.5, -120.0],
+];
+function geo(zip) {
+  if (ZIP_GEO[zip]) return ZIP_GEO[zip];
+  const d = Number(String(zip)[0]);
+  return ZIP1_GEO[Number.isFinite(d) ? d : 5];
+}
+function milesBetween(a, b) {
+  const [la1, lo1] = geo(a), [la2, lo2] = geo(b);
+  const R = 3958.8, rad = Math.PI / 180;
+  const dLa = (la2 - la1) * rad, dLo = (lo2 - lo1) * rad;
+  const h = Math.sin(dLa / 2) ** 2
+    + Math.cos(la1 * rad) * Math.cos(la2 * rad) * Math.sin(dLo / 2) ** 2;
+  return Math.round(2 * R * Math.asin(Math.sqrt(h)));
+}
+
+/* Business days, skipping weekends and Labor Day 2026. */
+function addBusinessDays(iso, n) {
+  const HOLIDAYS = new Set(['2026-09-07']);
+  const d = new Date(iso + 'T12:00:00Z');
+  let left = n;
+  while (left > 0) {
+    d.setUTCDate(d.getUTCDate() + 1);
+    const day = d.getUTCDay();
+    const key = d.toISOString().slice(0, 10);
+    if (day !== 0 && day !== 6 && !HOLIDAYS.has(key)) left -= 1;
+  }
+  return d.toISOString().slice(0, 10);
+}
+
+/* Calibrated against the two fixtures: ground = 3.17 + 0.00397/mi + 0.55/lb. */
+const SERVICES = [
+  ['ups', 'UPS® Ground Saver', 1.00, 'ground+1', false],
+  ['stamps_com', 'USPS Ground Advantage', 1.04, 'ground+1', false, ['No Saturday delivery on this service.']],
+  ['fedex', 'FedEx Ground® Economy', 1.11, 'ground+2', false, ['Final mile handed to USPS; no delivery appointment.']],
+  ['ups', 'UPS® Ground', 1.31, 'ground', false],
+  ['fedex', 'FedEx Home Delivery®', 1.40, 'ground', false],
+  ['stamps_com', 'USPS Priority Mail®', 1.53, 'cap3', false],
+  ['ups', 'UPS 3 Day Select®', 2.21, 'fixed3', true],
+  ['fedex', 'FedEx Express Saver®', 2.43, 'fixed3', true],
+  ['fedex', 'FedEx 2Day®', 3.49, 'fixed2', true],
+  ['ups', 'UPS 2nd Day Air®', 3.68, 'fixed2', true],
+  ['stamps_com', 'USPS Priority Mail Express®', 4.12, 'fixed1', true],
+  ['fedex', 'FedEx 2Day® A.M.', 4.54, 'fixed2', true],
+  ['ups', 'UPS 2nd Day Air® A.M.', 4.81, 'fixed2', true],
+  ['ups', 'UPS Next Day Air Saver®', 6.96, 'fixed1', true],
+  ['fedex', 'FedEx Standard Overnight®', 7.37, 'fixed1', true],
+  ['ups', 'UPS Next Day Air®', 8.43, 'fixed1', true],
+  ['fedex', 'FedEx Priority Overnight®', 8.79, 'fixed1', true],
+  ['dhl_express', 'DHL Express Worldwide', 11.10, 'fixed2', true],
+  ['ups', 'UPS Next Day Air® Early', 12.18, 'fixed1', true],
+  ['fedex', 'FedEx First Overnight®', 13.16, 'fixed1', true],
+];
+
+const stateOfZip = (z) => (/^9[0-6]/.test(z) ? 'CA' : /^0[7-8]/.test(z) ? 'NJ' : null);
+
+function quoteFor(fromZip, toZip, lbs) {
+  const mi = milesBetween(fromZip, toZip);
+  const w = Math.max(0.5, Number(lbs) || 5);
+  const groundBase = 3.17 + 0.00397 * mi + 0.55 * w;
+  const groundDays = Math.min(6, Math.max(1, Math.ceil(mi / 450)));
+
+  const daysFor = (rule) => rule === 'ground' ? groundDays
+    : rule === 'ground+1' ? Math.min(6, groundDays + 1)
+    : rule === 'ground+2' ? Math.min(6, groundDays + 2)
+    : rule === 'cap3' ? Math.min(3, groundDays)
+    : Number(rule.replace('fixed', ''));
+
+  const rates = SERVICES.map((sv, i) => {
+    const [carrier, name, mult, rule, gtd, warnings] = sv;
+    const days = daysFor(rule);
+    /* Express is priced off distance on its own curve, not off the ground
+       rate: fitted through both fixture lanes (UPS Next Day Air Saver at
+       $41.60 over 111 mi and $89.40 over 1,741 mi), which reproduces the
+       other express rows to within a few percent. An earlier version added a
+       flat uplift to ground and put an $80 overnight on a 111-mile lane. */
+    const price = rule.startsWith('fixed')
+      ? Math.round(mult * (5.5093 + 0.004213 * mi) * 100) / 100
+      : Math.round(groundBase * mult * 100) / 100;
+    return {
+      rate_id: 'g-' + i, carrier_code: carrier, service_type: name,
+      total_amount: { currency: 'usd', amount: price },
+      delivery_days: days, estimated_delivery_date: addBusinessDays(SHIP_DATE, days),
+      guaranteed_service: gtd, warnings: warnings || [],
+    };
+  }).sort((a, b) => a.total_amount.amount - b.total_amount.amount);
+
+  /* Sway needs a hub in the origin state and only sells its own metro. */
+  const st = stateOfZip(fromZip);
+  const hub = st === 'CA' ? 'Warp LAX Hub' : st === 'NJ' ? 'Sway Elmwood Park' : null;
+  const sway = (hub && mi <= 150 && w <= 25)
+    ? { rates: [{ service_type: 'EXPEDITED', transit_days: 1,
+        total_amount: { currency: 'usd', amount: Math.round((9 + 0.03 * mi) * 100) / 100 } }],
+        dropOffName: hub }
+    : null;
+
+  return { rates, sway, miles: mi };
+}
+
 const SC = SCENARIOS.find((s) => s.id === LANE_ID);
-const MODEL = buildModel(SC);
-const state = { carrier: 'all', gtd: 'all', more: {}, editingLane: false, lane: null };
+let MODEL = buildModel(SC);
+let LANE_MILES = null;
+
+/* Re-quote from whatever is in the lane fields right now. */
+function requote() {
+  const l = state.lane;
+  if (!l) return;
+  const q = quoteFor(l.fromZip, l.toZip, state.weight);
+  LANE_MILES = q.miles;
+  MODEL = buildModel({ rates: q.rates, sway: q.sway });
+  state.more = {};
+  /* A carrier filter can survive into a lane that carrier does not serve,
+     which would show an empty result the customer did not ask for. */
+  if (state.carrier !== 'all' && !MODEL.options.some((o) => o.carrier === state.carrier)) {
+    state.carrier = 'all';
+  }
+}
+const state = { carrier: 'all', gtd: 'all', more: {}, editingLane: false, lane: null, weight: 5 };
 
 /* Stand-in for components/portal/zip-autofill.ts, which calls
    /api/fulfillment/parcel/zip-lookup. A static page has no endpoint, so a
@@ -460,8 +601,12 @@ function results() {
   /* Warp-green dot instead of a middot, same as the track page's Sep. */
   const dot = '<span class="sep-dot" aria-hidden="true"></span>';
   const pkgBits = SC.lane.packages.split(' · ').map(esc).join(dot);
+  const l = state.lane || {};
+  const laneText = (l.fromCity || l.fromZip) + ' ' + l.fromZip + ' → ' + (l.toCity || l.toZip) + ' ' + l.toZip;
+  const pkgText = '1 package' + dot + state.weight + ' lb'
+    + (LANE_MILES != null ? dot + LANE_MILES.toLocaleString() + ' mi' : '');
   const head = '<div class="res-head"><div><h2>Rates</h2><div class="res-sub">'
-    + esc(SC.lane.from) + ' → ' + esc(SC.lane.to) + dot + pkgBits + '</div></div>'
+    + esc(laneText) + dot + pkgText + '</div></div>'
     + '<div class="count"><b>' + list.length + '</b> of ' + MODEL.totalCount + ' shown'
     + '<span class="sub2">cheapest, fastest and balanced</span></div></div>';
 
@@ -572,10 +717,12 @@ function form() {
     + '<select class="input"><option>Small box</option><option>Medium box</option>'
     + '<option>Large box</option><option>Padded envelope</option><option>Tube</option>'
     + '<option>Custom dimensions</option></select></label>'
-    + fld('Weight (lb)', '5', 1) + fld('Length (in)', '12', 1)
+    + '<label class="field" style="flex:1 1 110px"><span class="label">Weight (lb)</span>'
+    + '<input class="input" id="wt" value="' + state.weight + '" inputmode="decimal"></label>'
+    + fld('Length (in)', '12', 1)
     + fld('Width (in)', '9', 1) + fld('Height (in)', '4', 1)
     + '</div>'
-    + '<div class="frow"><button class="btn" type="button">Get rates</button>'
+    + '<div class="frow"><button class="btn" type="button" data-quote="1">Get rates</button>'
     + '<button class="ghost" type="button">+ Add package</button></div>'
     + '</div>';
 }
@@ -585,10 +732,16 @@ const fld = (label, value, grow) => '<label class="field" style="flex:' + grow +
 function splitLoc(s) { const m = s.match(/^(.*),\s*([A-Z]{2})\s*(\d{5})$/); return m ? [m[1] + ', ' + m[2], m[3]] : [s, '']; }
 
 document.addEventListener('click', (e) => {
-  const el = e.target.closest('[data-f],[data-more],[data-edit]');
+  const el = e.target.closest('[data-f],[data-more],[data-edit],[data-quote]');
   if (!el) return;
   e.preventDefault();
-  if (el.dataset.edit) state.editingLane = !state.editingLane;
+  if (el.dataset.quote) {
+    const wt = document.getElementById('wt');
+    if (wt) state.weight = Math.max(0.1, Number(wt.value) || 5);
+    state.editingLane = false;
+    requote();
+  }
+  else if (el.dataset.edit) state.editingLane = !state.editingLane;
   else if (el.dataset.f) { state[el.dataset.f] = el.dataset.v; state.more = {}; }
   else state.more[el.dataset.more] = !state.more[el.dataset.more];
   render();
