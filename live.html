@@ -124,7 +124,7 @@ select.input{appearance:none;cursor:pointer}
 /* Every card the same height, so a note in one tier does not make that
    whole row taller than the tier above it. Cards already stretch to
    match WITHIN a row; this extends that across the page. */
-.card{min-height:286px;position:relative;overflow:hidden;display:flex;flex-direction:column;border-radius:18px;padding:18px 18px 15px;background:var(--s1);border:1px solid var(--border);transition:transform .22s cubic-bezier(.23,1,.32,1),box-shadow .22s,border-color .18s}
+.card{position:relative;display:flex;flex-direction:column;border-radius:18px;padding:18px 18px 15px;background:var(--s1);border:1px solid var(--border);transition:transform .22s cubic-bezier(.23,1,.32,1),box-shadow .22s,border-color .18s}
 .card:hover{transform:translateY(-4px);box-shadow:0 18px 42px rgba(0,0,0,.5);border-color:var(--border-strong)}
 /* The recommended card is a green TINT and border, with no gradient bar
    across the top. The bar was doing the same job twice and the fade-out
@@ -138,7 +138,22 @@ select.input{appearance:none;cursor:pointer}
 .card-price{font-size:30px;font-weight:700;letter-spacing:-.05em;line-height:1;font-variant-numeric:tabular-nums;margin-bottom:8px}
 .card-arrive{font-size:13.5px;font-weight:600;margin-bottom:11px;letter-spacing:-.01em}
 .card-arrive .rel{color:var(--muted);font-weight:500}
-.card-meta{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--muted);margin-bottom:14px;flex-grow:1}
+.card-meta{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--muted);margin-bottom:14px}
+.card-meta.grow{flex-grow:1}
+.gchip{font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);
+  border:1px solid var(--border);border-radius:5px;padding:2px 6px;white-space:nowrap}
+/* Own tooltip: native title= waits about a second and the delay cannot be
+   configured. Instant here, and reachable by keyboard and by tap. */
+.mark{position:relative;cursor:help;color:var(--warning);font-weight:700;
+  border-bottom:1px dotted var(--border-strong)}
+.mark .tip{position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);
+  width:max-content;max-width:210px;text-align:left;background:var(--s4);color:var(--text-2);
+  border:1px solid var(--border-strong);border-radius:8px;padding:7px 10px;font-size:11px;
+  font-weight:500;line-height:1.45;opacity:0;visibility:hidden;z-index:6;pointer-events:none;
+  box-shadow:0 8px 22px rgba(0,0,0,.5)}
+.mark:hover .tip,.mark:focus .tip,.mark.open .tip{opacity:1;visibility:visible}
+.mark .tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  border:5px solid transparent;border-top-color:var(--border-strong)}
 .card-gtd{color:var(--dim);font-size:11.5px}
 /* Disclaimer, same as the freight mockup: an amber asterisk against dim
    text. The dashed rule this replaces drew a line across the card for a
@@ -596,18 +611,18 @@ function card(o, lead, tierLabel) {
     : (o.days != null ? o.days + ' business day' + (o.days === 1 ? '' : 's') : 'Transit varies');
   return '<div class="card' + (lead ? ' best' : '') + '"><div class="card-head">'
     + '<span class="chip' + (o.carrier === 'Sway' ? ' green' : '') + '">' + esc(o.carrier) + '</span>'
+    + (o.guaranteed === 1 ? '<span class="gchip">Guaranteed</span>' : '')
     + (lead ? '<span class="flag">' + tierLabel + '</span>' : '') + '</div>'
     + '<div class="card-price">' + money(o.price) + '</div>'
     + '<div class="card-arrive">' + when + '</div>'
-    + '<div class="card-meta"><span>' + esc(o.service) + '</span>'
-    + (o.guaranteed === 1 ? '<span class="card-gtd">Guaranteed delivery time</span>' : '')
-    + '</div>'
-    /* Outside card-meta on purpose. card-meta carries flex-grow, so a note
-       inside it got pinned to the top and the slack opened up underneath —
-       the disclaimer ended up floating in the middle of the card. Out here it
-       sits against the button, where the condition is read last, immediately
-       before the thing it is a condition of. */
-    + o.conditions.map((c) => '<div class="card-note"><span class="star">*</span><span>' + esc(c) + '</span></div>').join('')
+    /* Every card the same shape: the guarantee is a chip up in the head and
+       the condition is a marker after the service name, so no card carries
+       lines another card lacks. That is what lets the floor go. */
+    + '<div class="card-meta grow"><span>' + esc(o.service)
+    + o.conditions.map((c) => ' <span class="mark" tabindex="0" role="note" aria-label="' + esc(c)
+        + '">*<span class="tip">' + esc(c) + '</span></span>').join('')
+    + '</span></div>'
+
     + '<button class="card-cta' + (lead ? ' primary' : '') + '" type="button">Buy label →</button></div>';
 }
 
@@ -779,6 +794,11 @@ const fld = (label, value, grow) => '<label class="field" style="flex:' + grow +
 function splitLoc(s) { const m = s.match(/^(.*),\s*([A-Z]{2})\s*(\d{5})$/); return m ? [m[1] + ', ' + m[2], m[3]] : [s, '']; }
 
 document.addEventListener('click', (e) => {
+  /* No hover on touch, so a tap opens the note and a tap elsewhere shuts it. */
+  const mk = e.target.closest('.mark');
+  document.querySelectorAll('.mark.open').forEach((x) => { if (x !== mk) x.classList.remove('open'); });
+  if (mk) { mk.classList.toggle('open'); return; }
+
   const el = e.target.closest('[data-f],[data-more],[data-edit],[data-quote]');
   if (!el) return;
   e.preventDefault();
