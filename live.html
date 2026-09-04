@@ -71,13 +71,12 @@ h1,h2,h3{letter-spacing:-.025em;font-weight:600;line-height:1.2;margin:0}
 .zip-city.unknown{color:var(--warning)}
 .lane-arrow{color:var(--dim);font-size:17px;padding-top:4px}
 @media(max-width:620px){.lane-row{grid-template-columns:1fr}.lane-arrow{display:none}}
-.prefill-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between}
+.prefill-row{display:flex;justify-content:flex-end;margin-bottom:-4px}
 .edit-btn{font:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:6px 13px;
   border-radius:999px;background:transparent;color:var(--muted);border:1px solid var(--border)}
 .edit-btn:hover{color:var(--text);border-color:var(--border-strong)}
 .zip.on{background:var(--s2);border-color:var(--green-soft)}
 .zip.on:focus{outline:2px solid var(--green);outline-offset:1px}
-.prefill{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--green);background:var(--green-glow);border:1px solid var(--green-soft);border-radius:var(--radius-sm);padding:7px 11px;justify-self:start}
 .frow{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
 .field{display:grid;gap:5px;flex:1 1 150px}
 .label{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--dim)}
@@ -697,13 +696,11 @@ function form() {
   const { fromZip, toZip, fromCity, toCity } = state.lane;
   const editing = state.editingLane;
   return '<div class="glass">'
+    /* Just the control. The banner that used to sit here announced that the
+       ZIPs came from the dashboard, which the customer already knows — they
+       just came from it — and it took a full row to say so on every visit.
+       The button carries what is actionable; nothing carries the rest. */
     + '<div class="prefill-row">'
-    + '<span class="prefill">' + (editing
-      ? 'Editing the lane — type a ZIP and the city fills itself'
-      : '✓ Origin and destination came from your dashboard — just confirm the package') + '</span>'
-    /* Without this the only way to try another lane is to go back to the
-       dashboard and start again, which is a long way round for changing five
-       digits on a page that is already showing you rates. */
     + '<button class="edit-btn" type="button" data-edit="1">'
     + (editing ? 'Done' : 'Edit lane') + '</button>'
     + '</div>'
