@@ -1,0 +1,203 @@
+<title>Quote Form Density</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+:root{
+  --green:#3ddc84;--green-dim:#32c472;--green-glow:rgba(61,220,132,.1);--green-soft:rgba(61,220,132,.28);
+  --s0:#121518;--s1:#161a1f;--s2:#1b2027;--s3:#222731;--s4:#2f3641;
+  --border:#2a303a;--border-subtle:#222731;--border-strong:#383f4c;
+  --text:#f0f2f5;--text-2:#d5dae1;--muted:#a2abb6;--dim:#78828e;
+  --font:'Inter',system-ui,-apple-system,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--s0);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.6;letter-spacing:-.006em;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:44px 24px 90px}
+.eyebrow{font-size:10px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--green);margin-bottom:10px}
+h1{font-size:27px;letter-spacing:-.025em;margin:0 0 10px}
+.lede{color:var(--muted);max-width:70ch;margin:0 0 30px}
+.opt{padding:24px 0 28px;border-top:1px solid var(--border)}
+.opt-head{display:flex;align-items:baseline;gap:11px;flex-wrap:wrap;margin-bottom:16px}
+.opt-head h2{font-size:14px;margin:0;color:var(--text-2)}
+.tag{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--green);background:var(--green-glow);border:1px solid var(--green-soft);border-radius:5px;padding:2px 7px}
+.h-badge{font-family:var(--mono);font-size:11px;color:var(--dim);border:1px solid var(--border);border-radius:5px;padding:2px 7px}
+.opt-note{font-size:12.5px;color:var(--dim);flex:1 1 320px;min-width:0}
+
+.glass{position:relative;background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:18px}
+.glass.tight{padding:14px}
+.label{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--dim)}
+.field{display:grid;gap:5px}
+.input{font:inherit;font-size:13.5px;padding:9px 12px;border-radius:8px;background:var(--s0);border:1px solid var(--border);color:var(--text);width:100%}
+.input.sm{font-size:13px;padding:7px 10px}
+.btn{font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;padding:8px 15px;border-radius:8px;border:none;background:var(--green);color:var(--s0)}
+.btn.sm{padding:7px 13px;font-size:12px}
+.ghost{font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;background:transparent;border:none;color:var(--muted)}
+.edit-btn{font:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:5px 12px;border-radius:999px;background:transparent;color:var(--muted);border:1px solid var(--border)}
+.edit-wrap{position:absolute;top:10px;right:18px}
+
+/* A · current */
+.lane-row{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:14px;align-items:center}
+.lane-field{display:grid;gap:7px}
+.lane-label{font-size:13.5px;color:var(--text-2);font-weight:500}
+.zip{font:inherit;font-size:17px;font-weight:600;text-align:center;font-variant-numeric:tabular-nums;padding:13px 12px;border-radius:10px;background:var(--s0);border:1px solid var(--border);color:var(--text);width:100%}
+.zip-city{font-size:12.5px;color:var(--muted);text-align:center;min-height:19px}
+.lane-arrow{color:var(--dim);font-size:17px;padding-top:4px}
+.frow{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-top:14px}
+
+/* B · tighter */
+.zip.sm{font-size:15px;padding:9px 12px}
+.lane-field.sm{gap:4px}
+.zip-city.sm{font-size:11.5px;min-height:16px}
+
+/* C · one line */
+.oneline{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.inline-zip{font:inherit;font-size:14px;font-weight:600;text-align:center;width:88px;padding:8px 6px;border-radius:8px;background:var(--s0);border:1px solid var(--border);color:var(--text);font-variant-numeric:tabular-nums}
+.inline-city{font-size:11.5px;color:var(--dim)}
+.stack2{display:grid;gap:1px;justify-items:center}
+.divider{width:1px;height:26px;background:var(--border);margin:0 4px}
+
+/* D · summary bar */
+.bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:13px 16px;background:var(--s1);border:1px solid var(--border);border-radius:12px}
+.bar .lane{font-size:15px;font-weight:600;letter-spacing:-.01em}
+.bar .lane .ar{color:var(--dim);padding:0 4px}
+.bar .who{font-size:12.5px;color:var(--muted)}
+.bar .spacer{margin-left:auto}
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">Warp Portal · /portal/parcel · quote form</div>
+  <h1>Shrinking the quote form</h1>
+  <p class="lede">The lane arrives already answered and the package is usually a preset, so most of
+  this card is confirming things the customer did not choose here. Heights measured at 1400px wide.</p>
+
+  <div class="opt">
+    <div class="opt-head"><h2>A · Current</h2><span class="tag">Now</span><span class="h-badge" id="hA">—</span>
+      <span class="opt-note">Five rows: labels, ZIPs, cities, package fields, actions.</span></div>
+    <div class="glass" id="A">
+      <div class="edit-wrap"><button class="edit-btn" type="button">Edit lane</button></div>
+      <div class="lane-row">
+        <label class="lane-field"><span class="lane-label">From</span>
+          <input class="zip" value="90013" readonly><span class="zip-city">Los Angeles, CA</span></label>
+        <span class="lane-arrow">→</span>
+        <label class="lane-field"><span class="lane-label">To</span>
+          <input class="zip" value="60607" readonly><span class="zip-city">Chicago, IL</span></label>
+      </div>
+      <div class="frow">
+        <label class="field" style="flex:1 1 190px"><span class="label">Package</span>
+          <select class="input"><option>Small box — 12 × 9 × 4 in</option></select></label>
+        <label class="field" style="flex:1 1 108px"><span class="label">Weight (lb)</span><input class="input" value="5"></label>
+        <label class="field" style="flex:1 1 108px"><span class="label">Length (in)</span><input class="input" value="12"></label>
+        <label class="field" style="flex:1 1 108px"><span class="label">Width (in)</span><input class="input" value="9"></label>
+        <label class="field" style="flex:1 1 108px"><span class="label">Height (in)</span><input class="input" value="4"></label>
+      </div>
+      <div class="frow"><button class="btn" type="button">Get rates</button><button class="ghost" type="button">+ Add package</button></div>
+    </div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><h2>B · Tighter, actions inline</h2><span class="h-badge" id="hB">—</span>
+      <span class="opt-note">Same layout, smaller inputs, and Get rates joins the package row instead of taking one of its own.</span></div>
+    <div class="glass tight" id="B">
+      <div class="edit-wrap"><button class="edit-btn" type="button">Edit lane</button></div>
+      <div class="lane-row">
+        <label class="lane-field sm"><span class="lane-label">From</span>
+          <input class="zip sm" value="90013" readonly><span class="zip-city sm">Los Angeles, CA</span></label>
+        <span class="lane-arrow">→</span>
+        <label class="lane-field sm"><span class="lane-label">To</span>
+          <input class="zip sm" value="60607" readonly><span class="zip-city sm">Chicago, IL</span></label>
+      </div>
+      <div class="frow" style="margin-top:12px">
+        <label class="field" style="flex:1 1 180px"><span class="label">Package</span>
+          <select class="input sm"><option>Small box — 12 × 9 × 4 in</option></select></label>
+        <label class="field" style="flex:1 1 96px"><span class="label">Weight</span><input class="input sm" value="5"></label>
+        <label class="field" style="flex:1 1 96px"><span class="label">L</span><input class="input sm" value="12"></label>
+        <label class="field" style="flex:1 1 96px"><span class="label">W</span><input class="input sm" value="9"></label>
+        <label class="field" style="flex:1 1 96px"><span class="label">H</span><input class="input sm" value="4"></label>
+        <button class="btn sm" type="button">Get rates</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><h2>C · Dimensions folded away</h2><span class="h-badge" id="hC">—</span>
+      <span class="opt-note">A preset already states its size, so the three boxes only appear for “Custom dimensions”. Three rows become two.</span></div>
+    <div class="glass tight" id="C">
+      <div class="edit-wrap"><button class="edit-btn" type="button">Edit lane</button></div>
+      <div class="lane-row">
+        <label class="lane-field sm"><span class="lane-label">From</span>
+          <input class="zip sm" value="90013" readonly><span class="zip-city sm">Los Angeles, CA</span></label>
+        <span class="lane-arrow">→</span>
+        <label class="lane-field sm"><span class="lane-label">To</span>
+          <input class="zip sm" value="60607" readonly><span class="zip-city sm">Chicago, IL</span></label>
+      </div>
+      <div class="frow" style="margin-top:12px">
+        <label class="field" style="flex:1 1 220px"><span class="label">Package</span>
+          <select class="input sm" id="cSel">
+            <option>Small box — 12 × 9 × 4 in</option><option>Tube — 38 × 6 × 6 in</option>
+            <option>Custom dimensions</option></select></label>
+        <label class="field" style="flex:1 1 110px"><span class="label">Weight (lb)</span><input class="input sm" value="5"></label>
+        <span id="cDims" style="display:none;gap:12px" class="frow"></span>
+        <button class="btn sm" type="button">Get rates</button>
+        <button class="ghost" type="button">+ Add package</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><h2>D · One line</h2><span class="h-badge" id="hD">—</span>
+      <span class="opt-note">Everything on a single row, cities tucked under each ZIP. Tightest form that still shows every field.</span></div>
+    <div class="glass tight" id="D">
+      <div class="oneline">
+        <span class="stack2"><input class="inline-zip" value="90013" readonly><span class="inline-city">Los Angeles, CA</span></span>
+        <span class="lane-arrow" style="padding:0">→</span>
+        <span class="stack2"><input class="inline-zip" value="60607" readonly><span class="inline-city">Chicago, IL</span></span>
+        <span class="divider"></span>
+        <select class="input sm" style="width:200px"><option>Small box — 12 × 9 × 4 in</option></select>
+        <input class="input sm" style="width:74px" value="5" title="Weight (lb)">
+        <span class="inline-city">lb</span>
+        <span class="spacer" style="margin-left:auto"></span>
+        <button class="btn sm" type="button">Get rates</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-head"><h2>E · Summary bar, expands on demand</h2><span class="h-badge" id="hE">—</span>
+      <span class="opt-note">The card collapses to what was chosen. Change opens the full form. One row until somebody needs more.</span></div>
+    <div id="E">
+      <div class="bar">
+        <span class="lane">90013 <span class="ar">→</span> 60607</span>
+        <span class="who">Los Angeles, CA to Chicago, IL · Small box, 5 lb</span>
+        <span class="spacer"></span>
+        <button class="edit-btn" type="button">Change</button>
+        <button class="btn sm" type="button">Get rates</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* Report each card's real height, so the comparison is measured rather than
+   eyeballed — the whole question here is vertical space. */
+function measure() {
+  ['A', 'B', 'C', 'D', 'E'].forEach((k) => {
+    const el = document.getElementById(k);
+    const badge = document.getElementById('h' + k);
+    if (el && badge) badge.textContent = Math.round(el.getBoundingClientRect().height) + 'px';
+  });
+}
+window.addEventListener('resize', measure);
+measure();
+
+/* C only shows the dimension boxes when the preset stops supplying them. */
+const cSel = document.getElementById('cSel');
+const cDims = document.getElementById('cDims');
+cDims.innerHTML = ['Length (in)', 'Width (in)', 'Height (in)'].map((l) =>
+  '<label class="field" style="flex:1 1 96px"><span class="label">' + l + '</span>'
+  + '<input class="input sm" value=""></label>').join('');
+cSel.addEventListener('change', () => {
+  cDims.style.display = cSel.value === 'Custom dimensions' ? 'flex' : 'none';
+  measure();
+});
+</script>
