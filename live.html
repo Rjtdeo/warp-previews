@@ -118,7 +118,12 @@ select.input{appearance:none;cursor:pointer}
    colour at 18px tall just reads as a dark line — the green was there and
    invisible. Same 4px dot as the lane line above, so both separators on the
    page mean the same thing and this one can actually be seen. */
-.sep{width:4px;height:4px;border-radius:50%;background:var(--green);margin:0 10px;flex:none}
+/* A full-height green rule rather than a dot: it stretches to the row and
+   then bleeds through the padding above and below — 11px up to meet the
+   divider under the header, 14px down to meet the panel's bottom edge — so
+   the three lines meet and read as one continuous separator instead of a
+   mark floating between two chips. */
+.sep{width:1px;align-self:stretch;background:var(--green);margin:-11px 12px -14px;flex:none}
 .chip-f{font:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:5px 11px;border-radius:999px;background:var(--s1);color:var(--muted);border:1px solid transparent}
 .chip-f:hover{color:var(--text);background:var(--s2)}
 .chip-f[aria-selected="true"]{background:var(--green-glow);color:var(--green);border-color:var(--green-soft)}
